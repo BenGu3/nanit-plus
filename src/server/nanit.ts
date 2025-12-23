@@ -17,12 +17,18 @@ export async function nanitFetch(path: string, token?: string, options: RequestI
     },
   });
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Nanit API error: ${response.status} - ${error}`);
+  const data = await response.json();
+
+  // HTTP 482 is MFA required - not an error, return the data
+  if (response.status === 482) {
+    return data;
   }
 
-  return response.json();
+  if (!response.ok) {
+    throw new Error(`Nanit API error: ${response.status} - ${JSON.stringify(data)}`);
+  }
+
+  return data;
 }
 
 export async function login(email: string, password: string) {

@@ -12,6 +12,10 @@ const server = serve({
       async POST(req) {
         const { email, password } = await req.json();
         const result = await nanit.login(email, password);
+        // Check if MFA is required
+        if (result.mfa_token) {
+          return Response.json(result, { status: 482 });
+        }
         return Response.json(result);
       },
     },
