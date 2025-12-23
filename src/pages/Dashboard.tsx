@@ -220,13 +220,15 @@ export function Dashboard() {
           <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
             <div className="mb-4 flex items-start justify-between gap-3">
               <div>
-                <h3 className="text-2xl font-bold text-gray-900">🍼 Feeds ({feeds.length})</h3>
+                <h3 className="text-2xl font-bold text-gray-900">
+                  🍼 Feeds ({feeds.length} - {totalFeedMl}ml - {totalFeedOz}oz)
+                </h3>
               </div>
               <div className="flex gap-3">
                 <div className="text-center border border-gray-200 rounded-md py-2 px-3 bg-gray-50">
-                  <p className="text-xs text-gray-400 mb-1">Total Volume</p>
+                  <p className="text-xs text-gray-400 mb-1">Last Feed</p>
                   <p className="text-base font-semibold text-gray-700">
-                    {totalFeedMl}ml ({totalFeedOz}oz)
+                    {feeds.length > 0 ? formatTimeSince(feeds[0].time) : 'N/A'}
                   </p>
                 </div>
                 <div className="text-center border border-gray-200 rounded-md py-2 px-3 bg-gray-50">
