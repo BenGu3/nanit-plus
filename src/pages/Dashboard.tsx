@@ -71,7 +71,10 @@ export function Dashboard() {
   };
 
   const formatExactTime = (timestamp: number) => {
-    return DateTime.fromSeconds(timestamp).toLocaleString(DateTime.DATETIME_MED);
+    const dt = DateTime.fromSeconds(timestamp);
+    const date = dt.toFormat('MMM d');
+    const time = dt.toFormat('h:mm a');
+    return `${date} @ ${time}`;
   };
 
   const getDiaperEmoji = (changeType?: string) => {
@@ -193,13 +196,13 @@ export function Dashboard() {
                   {diapers.map((event, index) => (
                     <div key={event.id}>
                       <div className="flex items-center text-xs sm:text-sm gap-2">
-                        <span className="text-gray-700 w-8 sm:w-12 text-base sm:text-lg">
+                        <span className="text-gray-700 w-20 sm:w-32 text-base sm:text-lg flex-shrink-0">
                           {getDiaperEmoji(event.change_type)}
                         </span>
                         <span className="text-gray-500 flex-1 min-w-0 truncate sm:truncate-none">
                           {formatExactTime(event.time)}
                         </span>
-                        <span className="text-gray-500 text-right w-20 sm:min-w-28 flex-shrink-0">
+                        <span className="text-gray-500 text-right w-24 sm:w-32 flex-shrink-0">
                           {formatTimeSince(event.time)}
                         </span>
                       </div>
@@ -261,7 +264,7 @@ export function Dashboard() {
                         <span className="text-gray-500 flex-1 min-w-0 truncate sm:truncate-none">
                           {formatExactTime(feed.time)}
                         </span>
-                        <span className="text-gray-500 text-right w-20 sm:min-w-28 flex-shrink-0">
+                        <span className="text-gray-500 text-right w-24 sm:w-32 flex-shrink-0">
                           {formatTimeSince(feed.time)}
                         </span>
                       </div>
