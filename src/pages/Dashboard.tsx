@@ -125,13 +125,13 @@ export function Dashboard() {
         </div>
       </header>
 
-      <main className="container mx-auto p-4 md:p-8">
-        <div className="flex justify-end items-center mb-6">
+      <main className="container mx-auto p-3 md:p-8">
+        <div className="flex justify-end items-center mb-4">
           <div className="flex gap-2">
             <button
               type="button"
               onClick={() => setTimeRange(12)}
-              className={`px-4 py-2 text-sm font-medium rounded transition ${
+              className={`px-3 py-1.5 text-sm font-medium rounded transition ${
                 timeRange === 12
                   ? 'bg-blue-600 text-white'
                   : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
@@ -142,7 +142,7 @@ export function Dashboard() {
             <button
               type="button"
               onClick={() => setTimeRange(24)}
-              className={`px-4 py-2 text-sm font-medium rounded transition ${
+              className={`px-3 py-1.5 text-sm font-medium rounded transition ${
                 timeRange === 24
                   ? 'bg-blue-600 text-white'
                   : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
@@ -153,17 +153,19 @@ export function Dashboard() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4">
           {/* Diapers Card */}
-          <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-            <div className="mb-4 flex items-start justify-between gap-3">
-              <div>
-                <h3 className="text-2xl font-bold text-gray-900">🐣 Diapers ({diapers.length})</h3>
+          <div className="bg-white border border-gray-200 rounded-lg p-4 md:p-6 shadow-sm">
+            <div className="mb-3 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+              <div className="flex-shrink-0">
+                <h3 className="text-xl md:text-2xl font-bold text-gray-900">
+                  🐣 Diapers ({diapers.length})
+                </h3>
               </div>
-              <div className="flex gap-3">
-                <div className="text-center border border-gray-200 rounded-md py-2 px-3 bg-gray-50">
-                  <p className="text-xs text-gray-400 mb-1">Last Poop</p>
-                  <p className="text-base font-semibold text-gray-700">
+              <div className="flex gap-2 flex-wrap">
+                <div className="text-center border border-gray-200 rounded-md py-1.5 px-2.5 bg-gray-50 flex-1 sm:flex-initial min-w-24">
+                  <p className="text-xs text-gray-400 mb-0.5">Last Poop</p>
+                  <p className="text-sm md:text-base font-semibold text-gray-700">
                     {(() => {
                       const lastPoop = diapers.find(
                         (e) => e.change_type === 'poop' || e.change_type === 'mixed',
@@ -172,9 +174,9 @@ export function Dashboard() {
                     })()}
                   </p>
                 </div>
-                <div className="text-center border border-gray-200 rounded-md py-2 px-3 bg-gray-50">
-                  <p className="text-xs text-gray-400 mb-1">Avg Interval</p>
-                  <p className="text-sm font-medium text-gray-700">
+                <div className="text-center border border-gray-200 rounded-md py-1.5 px-2.5 bg-gray-50 flex-1 sm:flex-initial min-w-24">
+                  <p className="text-xs text-gray-400 mb-0.5">Avg Interval</p>
+                  <p className="text-xs md:text-sm font-medium text-gray-700">
                     {diapers.length > 1 ? calculateAverageInterval(diapers) : 'N/A'}
                   </p>
                 </div>
@@ -190,12 +192,14 @@ export function Dashboard() {
                 <>
                   {diapers.map((event, index) => (
                     <div key={event.id}>
-                      <div className="flex items-center text-sm gap-3">
-                        <span className="text-gray-700 w-12">
+                      <div className="flex items-center text-xs sm:text-sm gap-2">
+                        <span className="text-gray-700 w-8 sm:w-12 text-base sm:text-lg">
                           {getDiaperEmoji(event.change_type)}
                         </span>
-                        <span className="text-gray-500 flex-1">{formatExactTime(event.time)}</span>
-                        <span className="text-gray-500 text-right min-w-28">
+                        <span className="text-gray-500 flex-1 min-w-0 truncate sm:truncate-none">
+                          {formatExactTime(event.time)}
+                        </span>
+                        <span className="text-gray-500 text-right w-20 sm:min-w-28 flex-shrink-0">
                           {formatTimeSince(event.time)}
                         </span>
                       </div>
@@ -217,23 +221,26 @@ export function Dashboard() {
           </div>
 
           {/* Feeds Card */}
-          <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-            <div className="mb-4 flex items-start justify-between gap-3">
-              <div>
-                <h3 className="text-2xl font-bold text-gray-900">
-                  🍼 Feeds ({feeds.length} - {totalFeedMl}ml - {totalFeedOz}oz)
+          <div className="bg-white border border-gray-200 rounded-lg p-4 md:p-6 shadow-sm">
+            <div className="mb-3 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+              <div className="flex-shrink-0">
+                <h3 className="text-xl md:text-2xl font-bold text-gray-900">
+                  🍼 Feeds ({feeds.length})
                 </h3>
+                <p className="text-sm text-gray-600">
+                  {totalFeedMl}ml ({totalFeedOz}oz)
+                </p>
               </div>
-              <div className="flex gap-3">
-                <div className="text-center border border-gray-200 rounded-md py-2 px-3 bg-gray-50">
-                  <p className="text-xs text-gray-400 mb-1">Last Feed</p>
-                  <p className="text-base font-semibold text-gray-700">
+              <div className="flex gap-2 flex-wrap">
+                <div className="text-center border border-gray-200 rounded-md py-1.5 px-2.5 bg-gray-50 flex-1 sm:flex-initial min-w-24">
+                  <p className="text-xs text-gray-400 mb-0.5">Last Feed</p>
+                  <p className="text-sm md:text-base font-semibold text-gray-700">
                     {feeds.length > 0 ? formatTimeSince(feeds[0].time) : 'N/A'}
                   </p>
                 </div>
-                <div className="text-center border border-gray-200 rounded-md py-2 px-3 bg-gray-50">
-                  <p className="text-xs text-gray-400 mb-1">Avg Interval</p>
-                  <p className="text-sm font-medium text-gray-700">
+                <div className="text-center border border-gray-200 rounded-md py-1.5 px-2.5 bg-gray-50 flex-1 sm:flex-initial min-w-24">
+                  <p className="text-xs text-gray-400 mb-0.5">Avg Interval</p>
+                  <p className="text-xs md:text-sm font-medium text-gray-700">
                     {feeds.length > 1 ? calculateAverageInterval(feeds) : 'N/A'}
                   </p>
                 </div>
@@ -247,12 +254,14 @@ export function Dashboard() {
                 <>
                   {feeds.map((feed, index) => (
                     <div key={feed.id}>
-                      <div className="flex items-center text-sm gap-3">
-                        <span className="text-gray-700 w-32">
+                      <div className="flex items-center text-xs sm:text-sm gap-2">
+                        <span className="text-gray-700 w-20 sm:w-32 flex-shrink-0">
                           {feed.feed_amount}ml ({mlToOz(feed.feed_amount || 0)}oz)
                         </span>
-                        <span className="text-gray-500 flex-1">{formatExactTime(feed.time)}</span>
-                        <span className="text-gray-500 text-right min-w-28">
+                        <span className="text-gray-500 flex-1 min-w-0 truncate sm:truncate-none">
+                          {formatExactTime(feed.time)}
+                        </span>
+                        <span className="text-gray-500 text-right w-20 sm:min-w-28 flex-shrink-0">
                           {formatTimeSince(feed.time)}
                         </span>
                       </div>
