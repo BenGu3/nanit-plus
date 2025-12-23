@@ -83,6 +83,22 @@ export function Dashboard() {
 
   const mlToOz = (ml: number) => (ml / 29.5735).toFixed(1);
 
+  const formatTimeDiff = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    return `${hours}h ${minutes}m`;
+  };
+
+  const calculateAverageInterval = (events: typeof diapers | typeof feeds) => {
+    if (events.length < 2) return null;
+    const intervals = [];
+    for (let i = 0; i < events.length - 1; i++) {
+      intervals.push(events[i].time - events[i + 1].time);
+    }
+    const avgSeconds = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+    return formatTimeDiff(avgSeconds);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -140,63 +156,117 @@ export function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Diapers Card */}
           <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-            <div className="flex justify-between items-start mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">🐣 Diapers ({diapers.length})</h3>
-              <div className="text-right">
-                <p className="text-xs text-gray-400">💩 last poop</p>
-                <p className="text-sm text-gray-600">
-                  {(() => {
-                    const lastPoop = diapers.find(
-                      (e) => e.change_type === 'poop' || e.change_type === 'mixed',
-                    );
-                    return lastPoop ? formatTimeSince(lastPoop.time) : 'N/A';
-                  })()}
-                </p>
+            <div className="mb-4 flex items-start justify-between gap-3">
+              <div>
+                <h3 className="text-2xl font-bold text-gray-900">🐣 Diapers ({diapers.length})</h3>
+              </div>
+              <div className="flex gap-3">
+                <div className="text-center border border-gray-200 rounded-md py-2 px-3 bg-gray-50">
+                  <p className="text-xs text-gray-400 mb-1">Last Poop</p>
+                  <p className="text-base font-semibold text-gray-700">
+                    {(() => {
+                      const lastPoop = diapers.find(
+                        (e) => e.change_type === 'poop' || e.change_type === 'mixed',
+                      );
+                      return lastPoop ? formatTimeSince(lastPoop.time) : 'N/A';
+                    })()}
+                  </p>
+                </div>
+                <div className="text-center border border-gray-200 rounded-md py-2 px-3 bg-gray-50">
+                  <p className="text-xs text-gray-400 mb-1">Avg Interval</p>
+                  <p className="text-sm font-medium text-gray-700">
+                    {diapers.length > 1 ? calculateAverageInterval(diapers) : 'N/A'}
+                  </p>
+                </div>
               </div>
             </div>
-            <div className="space-y-2 border-t border-gray-200 pt-4">
+            <div className="border-t border-gray-200"></div>
+            <div className="space-y-1 pt-2">
               {diapers.length === 0 ? (
                 <p className="text-gray-500 text-sm text-center">
                   No diaper changes in this period
                 </p>
               ) : (
-                diapers.map((event) => (
-                  <div key={event.id} className="flex items-center text-sm gap-3">
-                    <span className="text-gray-700 w-12">{getDiaperEmoji(event.change_type)}</span>
-                    <span className="text-gray-500 flex-1">{formatExactTime(event.time)}</span>
-                    <span className="text-gray-500 text-right min-w-28">
-                      {formatTimeSince(event.time)}
-                    </span>
-                  </div>
-                ))
+                <>
+                  {diapers.map((event, index) => (
+                    <div key={event.id}>
+                      <div className="flex items-center text-sm gap-3">
+                        <span className="text-gray-700 w-12">
+                          {getDiaperEmoji(event.change_type)}
+                        </span>
+                        <span className="text-gray-500 flex-1">{formatExactTime(event.time)}</span>
+                        <span className="text-gray-500 text-right min-w-28">
+                          {formatTimeSince(event.time)}
+                        </span>
+                      </div>
+                      {index < diapers.length - 1 && (
+                        <div className="relative my-2">
+                          <div className="border-b border-gray-200"></div>
+                          <div className="absolute right-0 top-1/2 -translate-y-1/2 bg-white px-2">
+                            <span className="text-xs text-gray-400">
+                              {formatTimeDiff(event.time - diapers[index + 1].time)}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </>
               )}
             </div>
           </div>
 
           {/* Feeds Card */}
           <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-            <div className="flex justify-between items-start mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">🍼 Feeds ({feeds.length})</h3>
-              <div className="text-right">
-                <p className="text-xs text-gray-400">{totalFeedOz}oz</p>
-                <p className="text-sm text-gray-600">{totalFeedMl}ml</p>
+            <div className="mb-4 flex items-start justify-between gap-3">
+              <div>
+                <h3 className="text-2xl font-bold text-gray-900">🍼 Feeds ({feeds.length})</h3>
+              </div>
+              <div className="flex gap-3">
+                <div className="text-center border border-gray-200 rounded-md py-2 px-3 bg-gray-50">
+                  <p className="text-xs text-gray-400 mb-1">Total Volume</p>
+                  <p className="text-base font-semibold text-gray-700">
+                    {totalFeedMl}ml ({totalFeedOz}oz)
+                  </p>
+                </div>
+                <div className="text-center border border-gray-200 rounded-md py-2 px-3 bg-gray-50">
+                  <p className="text-xs text-gray-400 mb-1">Avg Interval</p>
+                  <p className="text-sm font-medium text-gray-700">
+                    {feeds.length > 1 ? calculateAverageInterval(feeds) : 'N/A'}
+                  </p>
+                </div>
               </div>
             </div>
-            <div className="space-y-2 border-t border-gray-200 pt-4">
+            <div className="border-t border-gray-200"></div>
+            <div className="space-y-1 pt-2">
               {feeds.length === 0 ? (
                 <p className="text-gray-500 text-sm text-center">No feeds in this period</p>
               ) : (
-                feeds.map((feed) => (
-                  <div key={feed.id} className="flex items-center text-sm gap-3">
-                    <span className="text-gray-700 w-32">
-                      {feed.feed_amount}ml ({mlToOz(feed.feed_amount || 0)}oz)
-                    </span>
-                    <span className="text-gray-500 flex-1">{formatExactTime(feed.time)}</span>
-                    <span className="text-gray-500 text-right min-w-28">
-                      {formatTimeSince(feed.time)}
-                    </span>
-                  </div>
-                ))
+                <>
+                  {feeds.map((feed, index) => (
+                    <div key={feed.id}>
+                      <div className="flex items-center text-sm gap-3">
+                        <span className="text-gray-700 w-32">
+                          {feed.feed_amount}ml ({mlToOz(feed.feed_amount || 0)}oz)
+                        </span>
+                        <span className="text-gray-500 flex-1">{formatExactTime(feed.time)}</span>
+                        <span className="text-gray-500 text-right min-w-28">
+                          {formatTimeSince(feed.time)}
+                        </span>
+                      </div>
+                      {index < feeds.length - 1 && (
+                        <div className="relative my-2">
+                          <div className="border-b border-gray-200"></div>
+                          <div className="absolute right-0 top-1/2 -translate-y-1/2 bg-white px-2">
+                            <span className="text-xs text-gray-400">
+                              {formatTimeDiff(feed.time - feeds[index + 1].time)}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </>
               )}
             </div>
           </div>
