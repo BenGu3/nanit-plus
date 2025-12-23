@@ -1,0 +1,9 @@
+# Run lint
+echo "Running lint..."
+bun run lint || exit 1
+
+# Run build
+echo "Running build..."
+bun run build || exit 1
+
+echo "✅ Pre-commit checks passed!"

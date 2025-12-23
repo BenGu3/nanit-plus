@@ -36,6 +36,7 @@ export function Home() {
             {error instanceof Error ? error.message : 'Failed to load data'}
           </p>
           <button
+            type="button"
             onClick={handleSignOut}
             className="bg-blue-600 text-white px-6 py-2 rounded-md font-medium hover:bg-blue-700 transition"
           >
@@ -54,6 +55,7 @@ export function Home() {
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-gray-900">Nanit Insights</h1>
           <button
+            type="button"
             onClick={handleSignOut}
             className="text-gray-600 hover:text-gray-900 transition"
           >
@@ -76,7 +78,10 @@ export function Home() {
               </div>
             ) : (
               babies.map((baby) => (
-                <div key={baby.uid} className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+                <div
+                  key={baby.uid}
+                  className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm"
+                >
                   <div className="flex items-start justify-between">
                     <div>
                       <h3 className="text-2xl font-semibold text-gray-900 mb-2">
@@ -100,7 +105,9 @@ export function Home() {
           </div>
 
           <div className="mt-8 bg-green-50 border border-green-200 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Authentication Successful! 🎉</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              Authentication Successful! 🎉
+            </h3>
             <p className="text-sm text-gray-700">
               You've successfully signed in and retrieved your baby data from the Nanit API. Next
               steps: add care activity tracking and insights!
