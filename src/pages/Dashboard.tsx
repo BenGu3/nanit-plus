@@ -1,13 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { DateTime } from 'luxon';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { nanitAPI } from '@/lib/nanit-api';
 
 export function Dashboard() {
   const navigate = useNavigate();
-  const [feedTimeRange, setFeedTimeRange] = useState<12 | 24>(24);
-  const [showFeedDetails, setShowFeedDetails] = useState(false);
+  const [timeRange, setTimeRange] = useState<12 | 24>(24);
 
   const { data: babiesData } = useQuery({
     queryKey: ['babies'],
@@ -34,6 +33,56 @@ export function Dashboard() {
     navigate('/sign-in');
   };
 
+  // Memoize filtered events to prevent re-filtering on time range change
+  const { diapers, feeds } = useMemo(() => {
+    const events = calendarData?.calendar || [];
+    const cutoff = now.minus({ hours: timeRange }).toUnixInteger();
+
+    const diaperChanges = events
+      .filter((e) => e.time >= cutoff && e.type === 'diaper_change')
+      .sort((a, b) => b.time - a.time);
+
+    const bottleFeeds = events
+      .filter((e) => e.time >= cutoff && e.type === 'bottle_feed')
+      .sort((a, b) => b.time - a.time);
+
+    return { diapers: diaperChanges, feeds: bottleFeeds };
+  }, [calendarData, timeRange, now]);
+
+  const totalFeedMl = useMemo(
+    () => feeds.reduce((sum, feed) => sum + (feed.feed_amount || 0), 0),
+    [feeds],
+  );
+
+  const totalFeedOz = (totalFeedMl / 29.5735).toFixed(1);
+
+  const formatTimeSince = (timestamp: number) => {
+    const eventTime = DateTime.fromSeconds(timestamp);
+    const diff = now.diff(eventTime, ['days', 'hours', 'minutes']).toObject();
+
+    const days = Math.floor(diff.days || 0);
+    const hours = Math.floor(diff.hours || 0);
+    const minutes = Math.floor(diff.minutes || 0);
+
+    if (days >= 1) {
+      return `${days}d ${hours}h ago`;
+    }
+    return `${hours}h ${minutes}m ago`;
+  };
+
+  const formatExactTime = (timestamp: number) => {
+    return DateTime.fromSeconds(timestamp).toLocaleString(DateTime.DATETIME_MED);
+  };
+
+  const getDiaperEmoji = (changeType?: string) => {
+    if (changeType === 'pee') return '💧';
+    if (changeType === 'poop') return '💩';
+    if (changeType === 'mixed') return '💧💩';
+    return '?';
+  };
+
+  const mlToOz = (ml: number) => (ml / 29.5735).toFixed(1);
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -44,41 +93,6 @@ export function Dashboard() {
       </div>
     );
   }
-
-  const events = calendarData?.calendar || [];
-
-  // Filter events
-  const poops = events
-    .filter(
-      (e) => e.type === 'diaper_change' && (e.change_type === 'poop' || e.change_type === 'mixed'),
-    )
-    .sort((a, b) => b.time - a.time)
-    .slice(0, 5);
-
-  const pees = events
-    .filter((e) => e.type === 'diaper_change' && e.change_type === 'pee')
-    .sort((a, b) => b.time - a.time)
-    .slice(0, 5);
-
-  const feedCutoff = now.minus({ hours: feedTimeRange }).toUnixInteger();
-  const feeds = events
-    .filter((e) => e.type === 'bottle_feed' && e.time >= feedCutoff)
-    .sort((a, b) => b.time - a.time);
-
-  const totalFeedMl = feeds.reduce((sum, feed) => sum + (feed.feed_amount || 0), 0);
-  const totalFeedOz = (totalFeedMl / 29.5735).toFixed(1);
-
-  const formatTimeSince = (timestamp: number) => {
-    const eventTime = DateTime.fromSeconds(timestamp);
-    const diff = now.diff(eventTime, ['days', 'hours']).toObject();
-
-    if (diff.days && diff.days >= 1) {
-      return `${Math.floor(diff.days)}d ago`;
-    }
-    return `${Math.floor(diff.hours || 0)}h ago`;
-  };
-
-  const mlToOz = (ml: number) => (ml / 29.5735).toFixed(1);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -96,101 +110,95 @@ export function Dashboard() {
       </header>
 
       <main className="container mx-auto p-4 md:p-8">
-        <h2 className="text-3xl font-bold text-gray-900 mb-6">Dashboard</h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {/* Poops Card */}
-          <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Poops</h3>
-            {poops.length === 0 ? (
-              <p className="text-gray-500 text-sm">No recent poops</p>
-            ) : (
-              <div className="space-y-2">
-                {poops.map((event) => (
-                  <div key={event.id} className="flex justify-between items-center text-sm">
-                    <span className="text-gray-700">{event.change_type}</span>
-                    <span className="text-gray-500">{formatTimeSince(event.time)}</span>
-                  </div>
-                ))}
-              </div>
-            )}
+        <div className="flex justify-end items-center mb-6">
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setTimeRange(12)}
+              className={`px-4 py-2 text-sm font-medium rounded transition ${
+                timeRange === 12
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              12h
+            </button>
+            <button
+              type="button"
+              onClick={() => setTimeRange(24)}
+              className={`px-4 py-2 text-sm font-medium rounded transition ${
+                timeRange === 24
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              24h
+            </button>
           </div>
+        </div>
 
-          {/* Pees Card */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Diapers Card */}
           <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Pees</h3>
-            {pees.length === 0 ? (
-              <p className="text-gray-500 text-sm">No recent pees</p>
-            ) : (
-              <div className="space-y-2">
-                {pees.map((event) => (
-                  <div key={event.id} className="flex justify-between items-center text-sm">
-                    <span className="text-gray-700">pee</span>
-                    <span className="text-gray-500">{formatTimeSince(event.time)}</span>
-                  </div>
-                ))}
+            <div className="flex justify-between items-start mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">🐣 Diapers ({diapers.length})</h3>
+              <div className="text-right">
+                <p className="text-xs text-gray-400">💩 last poop</p>
+                <p className="text-sm text-gray-600">
+                  {(() => {
+                    const lastPoop = diapers.find(
+                      (e) => e.change_type === 'poop' || e.change_type === 'mixed',
+                    );
+                    return lastPoop ? formatTimeSince(lastPoop.time) : 'N/A';
+                  })()}
+                </p>
               </div>
-            )}
+            </div>
+            <div className="space-y-2 border-t border-gray-200 pt-4">
+              {diapers.length === 0 ? (
+                <p className="text-gray-500 text-sm text-center">
+                  No diaper changes in this period
+                </p>
+              ) : (
+                diapers.map((event) => (
+                  <div key={event.id} className="flex items-center text-sm gap-3">
+                    <span className="text-gray-700 w-12">{getDiaperEmoji(event.change_type)}</span>
+                    <span className="text-gray-500 flex-1">{formatExactTime(event.time)}</span>
+                    <span className="text-gray-500 text-right min-w-28">
+                      {formatTimeSince(event.time)}
+                    </span>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
 
           {/* Feeds Card */}
           <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Feed Volume</h3>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setFeedTimeRange(12)}
-                  className={`px-3 py-1 text-sm rounded ${
-                    feedTimeRange === 12
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  12h
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFeedTimeRange(24)}
-                  className={`px-3 py-1 text-sm rounded ${
-                    feedTimeRange === 24
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  24h
-                </button>
+            <div className="flex justify-between items-start mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">🍼 Feeds ({feeds.length})</h3>
+              <div className="text-right">
+                <p className="text-xs text-gray-400">{totalFeedOz}oz</p>
+                <p className="text-sm text-gray-600">{totalFeedMl}ml</p>
               </div>
             </div>
-
-            <div className="mb-4">
-              <p className="text-3xl font-bold text-gray-900">
-                {totalFeedMl}ml
-                <span className="text-lg font-normal text-gray-500"> ({totalFeedOz}oz)</span>
-              </p>
-              <p className="text-sm text-gray-500">{feeds.length} feeds</p>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setShowFeedDetails(!showFeedDetails)}
-              className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-            >
-              {showFeedDetails ? 'Hide details' : 'Show details'}
-            </button>
-
-            {showFeedDetails && (
-              <div className="mt-4 space-y-2 border-t border-gray-200 pt-4">
-                {feeds.map((feed) => (
-                  <div key={feed.id} className="flex justify-between items-center text-sm">
-                    <span className="text-gray-700">
+            <div className="space-y-2 border-t border-gray-200 pt-4">
+              {feeds.length === 0 ? (
+                <p className="text-gray-500 text-sm text-center">No feeds in this period</p>
+              ) : (
+                feeds.map((feed) => (
+                  <div key={feed.id} className="flex items-center text-sm gap-3">
+                    <span className="text-gray-700 w-32">
                       {feed.feed_amount}ml ({mlToOz(feed.feed_amount || 0)}oz)
                     </span>
-                    <span className="text-gray-500">{formatTimeSince(feed.time)}</span>
+                    <span className="text-gray-500 flex-1">{formatExactTime(feed.time)}</span>
+                    <span className="text-gray-500 text-right min-w-28">
+                      {formatTimeSince(feed.time)}
+                    </span>
                   </div>
-                ))}
-              </div>
-            )}
+                ))
+              )}
+            </div>
           </div>
         </div>
       </main>
