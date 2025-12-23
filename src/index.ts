@@ -35,8 +35,16 @@ const server = serve({
         if (!token) {
           return Response.json({ error: 'Unauthorized' }, { status: 401 });
         }
-        const result = await nanit.getBabies(token);
-        return Response.json(result);
+        try {
+          const result = await nanit.getBabies(token);
+          return Response.json(result);
+        } catch (error) {
+          // Check if it's a 401 from Nanit
+          if (error instanceof Error && error.message.includes('401')) {
+            return Response.json({ error: 'Session expired' }, { status: 401 });
+          }
+          return Response.json({ error: 'Failed to fetch babies' }, { status: 500 });
+        }
       },
     },
 
@@ -56,8 +64,16 @@ const server = serve({
           return Response.json({ error: 'Missing start or end time' }, { status: 400 });
         }
 
-        const result = await nanit.getCalendar(token, babyUid, start, end);
-        return Response.json(result);
+        try {
+          const result = await nanit.getCalendar(token, babyUid, start, end);
+          return Response.json(result);
+        } catch (error) {
+          // Check if it's a 401 from Nanit
+          if (error instanceof Error && error.message.includes('401')) {
+            return Response.json({ error: 'Session expired' }, { status: 401 });
+          }
+          return Response.json({ error: 'Failed to fetch calendar' }, { status: 500 });
+        }
       },
     },
   },
