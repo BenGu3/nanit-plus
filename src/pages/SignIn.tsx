@@ -34,7 +34,7 @@ export function SignIn() {
         setStep('mfa');
       } else if (response.access_token || response.token) {
         // Direct login (unlikely but handle it)
-        navigate('/');
+        navigate('/dashboard');
       } else {
         setError('Unexpected response from server');
       }
@@ -52,7 +52,7 @@ export function SignIn() {
 
     try {
       await nanitAPI.verifyMFA(email, password, mfaToken, mfaCode, channel);
-      navigate('/');
+      navigate('/dashboard');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'MFA verification failed');
     } finally {

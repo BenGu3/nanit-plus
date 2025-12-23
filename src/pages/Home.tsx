@@ -13,7 +13,7 @@ export function Home() {
 
   const handleSignOut = () => {
     nanitAPI.clearToken();
-    navigate('/signin');
+    navigate('/sign-in');
   };
 
   if (isLoading) {
