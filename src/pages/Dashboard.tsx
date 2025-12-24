@@ -87,9 +87,19 @@ export function Dashboard() {
 
   const formatExactTime = (timestamp: number) => {
     const dt = DateTime.fromSeconds(timestamp);
-    const date = dt.toFormat('MMM d');
+    const daysAgo = Math.floor(now.diff(dt, 'days').days);
+
+    let dateStr: string;
+    if (daysAgo < 7) {
+      // Within last 7 days - show day of week
+      dateStr = dt.toFormat('EEE'); // Mon, Tue, Wed, etc.
+    } else {
+      // Older than 7 days - show month + day
+      dateStr = dt.toFormat('MMM d');
+    }
+
     const time = dt.toFormat('h:mm a');
-    return `${date} @ ${time}`;
+    return `${dateStr} @ ${time}`;
   };
 
   const getDiaperEmoji = (changeType?: string) => {
@@ -205,8 +215,8 @@ export function Dashboard() {
                 <>
                   {diapers.map((event, index) => (
                     <div key={event.id}>
-                      <div className="flex items-center text-xs sm:text-sm gap-2">
-                        <span className="text-gray-700 w-20 sm:w-32 text-base sm:text-lg flex-shrink-0">
+                      <div className="flex items-center text-xs sm:text-sm gap-2 min-h-8">
+                        <span className="text-gray-700 w-20 sm:w-32 text-sm flex-shrink-0">
                           {getDiaperEmoji(event.change_type)}
                         </span>
                         <span className="text-gray-500 flex-1 min-w-0 truncate sm:truncate-none">
@@ -267,7 +277,7 @@ export function Dashboard() {
                 <>
                   {feeds.map((feed, index) => (
                     <div key={feed.id}>
-                      <div className="flex items-center text-xs sm:text-sm gap-2">
+                      <div className="flex items-center text-xs sm:text-sm gap-2 min-h-8">
                         <span className="text-gray-700 w-20 sm:w-32 flex-shrink-0">
                           {feed.feed_amount}ml ({mlToOz(feed.feed_amount || 0)}oz)
                         </span>
