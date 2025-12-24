@@ -6,7 +6,7 @@ import { nanitAPI } from '@/lib/nanit-api';
 
 export function Dashboard() {
   const navigate = useNavigate();
-  const [timeRange, setTimeRange] = useState<12 | 24>(24);
+  const [timeRange, setTimeRange] = useState<12 | 24>(12);
 
   const { data: babiesData } = useQuery({
     queryKey: ['babies'],
@@ -33,21 +33,36 @@ export function Dashboard() {
     navigate('/sign-in');
   };
 
+  // Get all events for last poop/feed calculation
+  const allEvents = calendarData?.calendar || [];
+
+  const lastPoop = useMemo(() => {
+    return allEvents
+      .filter(
+        (e) =>
+          e.type === 'diaper_change' && (e.change_type === 'poop' || e.change_type === 'mixed'),
+      )
+      .sort((a, b) => b.time - a.time)[0];
+  }, [allEvents]);
+
+  const lastFeed = useMemo(() => {
+    return allEvents.filter((e) => e.type === 'bottle_feed').sort((a, b) => b.time - a.time)[0];
+  }, [allEvents]);
+
   // Memoize filtered events to prevent re-filtering on time range change
   const { diapers, feeds } = useMemo(() => {
-    const events = calendarData?.calendar || [];
     const cutoff = now.minus({ hours: timeRange }).toUnixInteger();
 
-    const diaperChanges = events
+    const diaperChanges = allEvents
       .filter((e) => e.time >= cutoff && e.type === 'diaper_change')
       .sort((a, b) => b.time - a.time);
 
-    const bottleFeeds = events
+    const bottleFeeds = allEvents
       .filter((e) => e.time >= cutoff && e.type === 'bottle_feed')
       .sort((a, b) => b.time - a.time);
 
     return { diapers: diaperChanges, feeds: bottleFeeds };
-  }, [calendarData, timeRange, now]);
+  }, [allEvents, timeRange, now]);
 
   const totalFeedMl = useMemo(
     () => feeds.reduce((sum, feed) => sum + (feed.feed_amount || 0), 0),
@@ -168,18 +183,13 @@ export function Dashboard() {
               <div className="flex gap-2 flex-wrap">
                 <div className="text-center border border-gray-200 rounded-md py-1.5 px-2.5 bg-gray-50 flex-1 sm:flex-initial min-w-24">
                   <p className="text-xs text-gray-400 mb-0.5">Last Poop</p>
-                  <p className="text-sm md:text-base font-semibold text-gray-700">
-                    {(() => {
-                      const lastPoop = diapers.find(
-                        (e) => e.change_type === 'poop' || e.change_type === 'mixed',
-                      );
-                      return lastPoop ? formatTimeSince(lastPoop.time) : 'N/A';
-                    })()}
+                  <p className="text-sm font-medium text-gray-700">
+                    {lastPoop ? formatTimeSince(lastPoop.time) : 'N/A'}
                   </p>
                 </div>
                 <div className="text-center border border-gray-200 rounded-md py-1.5 px-2.5 bg-gray-50 flex-1 sm:flex-initial min-w-24">
                   <p className="text-xs text-gray-400 mb-0.5">Avg Interval</p>
-                  <p className="text-xs md:text-sm font-medium text-gray-700">
+                  <p className="text-sm font-medium text-gray-700">
                     {diapers.length > 1 ? calculateAverageInterval(diapers) : 'N/A'}
                   </p>
                 </div>
@@ -237,13 +247,13 @@ export function Dashboard() {
               <div className="flex gap-2 flex-wrap">
                 <div className="text-center border border-gray-200 rounded-md py-1.5 px-2.5 bg-gray-50 flex-1 sm:flex-initial min-w-24">
                   <p className="text-xs text-gray-400 mb-0.5">Last Feed</p>
-                  <p className="text-sm md:text-base font-semibold text-gray-700">
-                    {feeds.length > 0 ? formatTimeSince(feeds[0].time) : 'N/A'}
+                  <p className="text-sm font-medium text-gray-700">
+                    {lastFeed ? formatTimeSince(lastFeed.time) : 'N/A'}
                   </p>
                 </div>
                 <div className="text-center border border-gray-200 rounded-md py-1.5 px-2.5 bg-gray-50 flex-1 sm:flex-initial min-w-24">
                   <p className="text-xs text-gray-400 mb-0.5">Avg Interval</p>
-                  <p className="text-xs md:text-sm font-medium text-gray-700">
+                  <p className="text-sm font-medium text-gray-700">
                     {feeds.length > 1 ? calculateAverageInterval(feeds) : 'N/A'}
                   </p>
                 </div>
