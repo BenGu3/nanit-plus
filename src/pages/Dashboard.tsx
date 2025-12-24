@@ -189,12 +189,15 @@ export function Dashboard() {
                 <h3 className="text-xl md:text-2xl font-bold text-gray-900">
                   🐣 Diapers ({diapers.length})
                 </h3>
+                <p className="text-sm text-gray-600">
+                  last poop: {lastPoop ? formatTimeSince(lastPoop.time) : 'N/A'}
+                </p>
               </div>
               <div className="flex gap-2 flex-wrap">
                 <div className="text-center border border-gray-200 rounded-md py-1.5 px-2.5 bg-gray-50 flex-1 sm:flex-initial min-w-24">
-                  <p className="text-xs text-gray-400 mb-0.5">Last Poop</p>
+                  <p className="text-xs text-gray-400 mb-0.5">Last Change</p>
                   <p className="text-sm font-medium text-gray-700">
-                    {lastPoop ? formatTimeSince(lastPoop.time) : 'N/A'}
+                    {diapers.length > 0 ? formatTimeSince(diapers[0].time) : 'N/A'}
                   </p>
                 </div>
                 <div className="text-center border border-gray-200 rounded-md py-1.5 px-2.5 bg-gray-50 flex-1 sm:flex-initial min-w-24">
