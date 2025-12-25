@@ -90,8 +90,7 @@ export function Dashboard() {
   const lastPoop = useMemo(() => {
     return recentEvents
       .filter(
-        (e) =>
-          e.type === 'diaper_change' && (e.change_type === 'poop' || e.change_type === 'mixed'),
+        (e) => e.type === 'diaper_change' && (e.change_type === 'poo' || e.change_type === 'mixed'),
       )
       .sort((a, b) => b.time - a.time)[0];
   }, [recentEvents]);
