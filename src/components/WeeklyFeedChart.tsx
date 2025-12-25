@@ -89,9 +89,9 @@ export function WeeklyFeedChart({
   const mlToOz = (ml: number) => (ml / 29.5735).toFixed(1);
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-4 md:p-6 shadow-sm">
+    <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
       {/* Header with navigation */}
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-3 flex items-center justify-between">
         <h3 className="text-xl md:text-2xl font-bold text-gray-900">🍼 Weekly Feed Chart</h3>
         <div className="flex items-center gap-3">
           <button
@@ -159,9 +159,9 @@ export function WeeklyFeedChart({
           <p className="text-sm">No feeds this week</p>
         </div>
       ) : (
-        <div className="pt-4">
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 30 }}>
+        <div className="pt-2">
+          <ResponsiveContainer width="100%" height={400}>
+            <BarChart data={chartData} margin={{ top: 5, right: 5, left: 5, bottom: 35 }}>
               <XAxis
                 dataKey="hourTimestamp"
                 type="number"
@@ -206,15 +206,15 @@ export function WeeklyFeedChart({
                 minTickGap={0}
               />
               <YAxis
-                tick={{ fill: '#6b7280', fontSize: 12 }}
+                tick={({ x, y, payload }) => {
+                  return (
+                    <text x={x} y={y} textAnchor="end" fill="#6b7280" fontSize={11} dy={4}>
+                      {payload.value}ml
+                    </text>
+                  );
+                }}
                 axisLine={false}
                 tickLine={false}
-                label={{
-                  value: 'ml',
-                  angle: -90,
-                  position: 'insideLeft',
-                  style: { fill: '#6b7280', fontSize: 12 },
-                }}
               />
               <Tooltip
                 cursor={{ fill: 'rgba(59, 130, 246, 0.1)' }}
