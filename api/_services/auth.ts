@@ -1,7 +1,10 @@
 import * as nanitAPI from './nanit-api';
 
 export async function handleLogin(email: string, password: string) {
-  const result = await nanitAPI.login(email, password);
+  const result = (await nanitAPI.login(email, password)) as {
+    mfa_token?: string;
+    [key: string]: unknown;
+  };
   return {
     data: result,
     status: result.mfa_token ? 482 : 200,
