@@ -23,17 +23,49 @@ export function Dashboard() {
 
   const babyUid = babiesData?.babies[0]?.uid;
 
-  const now = DateTime.now();
-  const startTime = now.minus({ days: 7 }).toUnixInteger();
-  const endTime = now.toUnixInteger();
+  const now = useMemo(() => DateTime.now(), []);
 
-  const { data: calendarData, isLoading } = useQuery({
-    queryKey: ['calendar', babyUid, startTime, endTime],
+  // Fetch last 24 hours for diapers/feeds cards
+  const { recentStartTime, recentEndTime } = useMemo(() => {
+    return {
+      recentStartTime: now.minus({ hours: 24 }).toUnixInteger(),
+      recentEndTime: now.toUnixInteger(),
+    };
+  }, [now]);
+
+  const { data: recentCalendarData, isLoading: isLoadingRecent } = useQuery({
+    queryKey: ['calendar', 'recent', babyUid, recentStartTime, recentEndTime],
     queryFn: () => {
       if (!babyUid) throw new Error('No baby UID');
-      return nanitAPI.getCalendar(babyUid, startTime, endTime);
+      return nanitAPI.getCalendar(babyUid, recentStartTime, recentEndTime);
     },
     enabled: !!babyUid,
+    staleTime: 1000 * 60 * 2, // Consider data fresh for 2 minutes
+    gcTime: 1000 * 60 * 10, // Keep in cache for 10 minutes
+  });
+
+  // Fetch data for the selected week for the chart
+  const { weekStartTime, weekEndTime } = useMemo(() => {
+    const weekEnd = weekStart.plus({ days: 7 });
+    return {
+      weekStartTime: weekStart.toUnixInteger(),
+      weekEndTime: weekEnd.toUnixInteger(),
+    };
+  }, [weekStart]);
+
+  const {
+    data: weekCalendarData,
+    isLoading: isLoadingWeek,
+    isFetching: isFetchingWeek,
+  } = useQuery({
+    queryKey: ['calendar', 'week', babyUid, weekStartTime, weekEndTime],
+    queryFn: () => {
+      if (!babyUid) throw new Error('No baby UID');
+      return nanitAPI.getCalendar(babyUid, weekStartTime, weekEndTime);
+    },
+    enabled: !!babyUid,
+    staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
+    gcTime: 1000 * 60 * 30, // Keep in cache for 30 minutes
   });
 
   const handleSignOut = () => {
@@ -49,36 +81,39 @@ export function Dashboard() {
     setWeekStart((prev) => prev.plus({ weeks: 1 }));
   };
 
-  // Get all events for last poop/feed calculation
-  const allEvents = calendarData?.calendar || [];
+  // Get events from recent data for diapers/feeds cards
+  const recentEvents = recentCalendarData?.calendar || [];
+
+  // Get events from week data for the chart
+  const weekEvents = weekCalendarData?.calendar || [];
 
   const lastPoop = useMemo(() => {
-    return allEvents
+    return recentEvents
       .filter(
         (e) =>
           e.type === 'diaper_change' && (e.change_type === 'poop' || e.change_type === 'mixed'),
       )
       .sort((a, b) => b.time - a.time)[0];
-  }, [allEvents]);
+  }, [recentEvents]);
 
   const lastFeed = useMemo(() => {
-    return allEvents.filter((e) => e.type === 'bottle_feed').sort((a, b) => b.time - a.time)[0];
-  }, [allEvents]);
+    return recentEvents.filter((e) => e.type === 'bottle_feed').sort((a, b) => b.time - a.time)[0];
+  }, [recentEvents]);
 
   // Memoize filtered events to prevent re-filtering on time range change
   const { diapers, feeds } = useMemo(() => {
     const cutoff = now.minus({ hours: timeRange }).toUnixInteger();
 
-    const diaperChanges = allEvents
+    const diaperChanges = recentEvents
       .filter((e) => e.time >= cutoff && e.type === 'diaper_change')
       .sort((a, b) => b.time - a.time);
 
-    const bottleFeeds = allEvents
+    const bottleFeeds = recentEvents
       .filter((e) => e.time >= cutoff && e.type === 'bottle_feed')
       .sort((a, b) => b.time - a.time);
 
     return { diapers: diaperChanges, feeds: bottleFeeds };
-  }, [allEvents, timeRange, now]);
+  }, [recentEvents, timeRange, now]);
 
   const totalFeedMl = useMemo(
     () => feeds.reduce((sum, feed) => sum + (feed.feed_amount || 0), 0),
@@ -143,7 +178,9 @@ export function Dashboard() {
     return formatTimeDiff(avgSeconds);
   };
 
-  if (isLoading) {
+  // Show full page loading only on very first load (when recent data doesn't exist)
+  // Week data can load in the background
+  if (isLoadingRecent && !recentCalendarData) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -324,10 +361,11 @@ export function Dashboard() {
 
           {/* Weekly Feed Chart */}
           <WeeklyFeedChart
-            allEvents={allEvents}
+            allEvents={weekEvents}
             weekStart={weekStart}
             onPrevWeek={handlePrevWeek}
             onNextWeek={handleNextWeek}
+            isLoading={isFetchingWeek}
           />
         </div>
       </main>
