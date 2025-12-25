@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon';
 import { useMemo, useState } from 'react';
 import { Bar, BarChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import type { CalendarEvent } from '@/lib/nanit-api';
+import type { CalendarEvent } from '@/api';
 
 interface WeeklyFeedChartProps {
   allEvents: CalendarEvent[];

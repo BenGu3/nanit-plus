@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { nanitAPI } from '@/lib/nanit-api';
+import { nanitAPI } from '@/api';
 
 export function Home() {
   const navigate = useNavigate();

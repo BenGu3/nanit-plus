@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import { nanitAPI } from '@/lib/nanit-api';
+import { nanitAPI } from '@/api';
 import { Dashboard } from '@/pages/Dashboard';
 import { SignIn } from '@/pages/SignIn';
 

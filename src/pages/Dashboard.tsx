@@ -2,8 +2,8 @@ import { useQuery } from '@tanstack/react-query';
 import { DateTime } from 'luxon';
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { nanitAPI } from '@/api';
 import { WeeklyFeedChart } from '@/components/WeeklyFeedChart';
-import { nanitAPI } from '@/lib/nanit-api';
 
 export function Dashboard() {
   const navigate = useNavigate();
