@@ -2,11 +2,19 @@ import { useQuery } from '@tanstack/react-query';
 import { DateTime } from 'luxon';
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { WeeklyFeedChart } from '@/components/WeeklyFeedChart';
 import { nanitAPI } from '@/lib/nanit-api';
 
 export function Dashboard() {
   const navigate = useNavigate();
   const [timeRange, setTimeRange] = useState<12 | 24>(12);
+
+  // Week navigation state - start with current week (Sunday-Saturday)
+  const [weekStart, setWeekStart] = useState(() => {
+    const now = DateTime.now();
+    // Get Sunday of current week
+    return now.startOf('week').minus({ days: 1 }); // Luxon week starts Monday, so minus 1 to get Sunday
+  });
 
   const { data: babiesData } = useQuery({
     queryKey: ['babies'],
@@ -31,6 +39,14 @@ export function Dashboard() {
   const handleSignOut = () => {
     nanitAPI.clearToken();
     navigate('/sign-in');
+  };
+
+  const handlePrevWeek = () => {
+    setWeekStart((prev) => prev.minus({ weeks: 1 }));
+  };
+
+  const handleNextWeek = () => {
+    setWeekStart((prev) => prev.plus({ weeks: 1 }));
   };
 
   // Get all events for last poop/feed calculation
@@ -181,42 +197,42 @@ export function Dashboard() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Diapers Card */}
-          <div className="bg-white border border-gray-200 rounded-lg p-4 md:p-6 shadow-sm">
-            <div className="mb-3 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-              <div className="flex-shrink-0">
-                <h3 className="text-xl md:text-2xl font-bold text-gray-900">
-                  🐣 Diapers ({diapers.length})
-                </h3>
-                <p className="text-sm text-gray-600">
-                  last poop: {lastPoop ? formatTimeSince(lastPoop.time) : 'N/A'}
-                </p>
-              </div>
-              <div className="flex gap-2 flex-wrap">
-                <div className="text-center border border-gray-200 rounded-md py-1.5 px-2.5 bg-gray-50 flex-1 sm:flex-initial min-w-24">
-                  <p className="text-xs text-gray-400 mb-0.5">Last Change</p>
-                  <p className="text-sm font-medium text-gray-700">
-                    {diapers.length > 0 ? formatTimeSince(diapers[0].time) : 'N/A'}
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Diapers Card */}
+            <div className="bg-white border border-gray-200 rounded-lg p-4 md:p-6 shadow-sm">
+              <div className="mb-3 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                <div className="flex-shrink-0">
+                  <h3 className="text-xl md:text-2xl font-bold text-gray-900">
+                    🐣 Diapers ({diapers.length})
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    last poop: {lastPoop ? formatTimeSince(lastPoop.time) : 'N/A'}
                   </p>
                 </div>
-                <div className="text-center border border-gray-200 rounded-md py-1.5 px-2.5 bg-gray-50 flex-1 sm:flex-initial min-w-24">
-                  <p className="text-xs text-gray-400 mb-0.5">Avg Interval</p>
-                  <p className="text-sm font-medium text-gray-700">
-                    {diapers.length > 1 ? calculateAverageInterval(diapers) : 'N/A'}
-                  </p>
+                <div className="flex gap-2 flex-wrap">
+                  <div className="text-center border border-gray-200 rounded-md py-1.5 px-2.5 bg-gray-50 flex-1 sm:flex-initial min-w-24">
+                    <p className="text-xs text-gray-400 mb-0.5">Last Change</p>
+                    <p className="text-sm font-medium text-gray-700">
+                      {diapers.length > 0 ? formatTimeSince(diapers[0].time) : 'N/A'}
+                    </p>
+                  </div>
+                  <div className="text-center border border-gray-200 rounded-md py-1.5 px-2.5 bg-gray-50 flex-1 sm:flex-initial min-w-24">
+                    <p className="text-xs text-gray-400 mb-0.5">Avg Interval</p>
+                    <p className="text-sm font-medium text-gray-700">
+                      {diapers.length > 1 ? calculateAverageInterval(diapers) : 'N/A'}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="border-t border-gray-200"></div>
-            <div className="space-y-1 pt-2">
-              {diapers.length === 0 ? (
-                <p className="text-gray-500 text-sm text-center">
-                  No diaper changes in this period
-                </p>
-              ) : (
-                <>
-                  {diapers.map((event, index) => (
+              <div className="border-t border-gray-200"></div>
+              <div className="space-y-1 pt-2">
+                {diapers.length === 0 ? (
+                  <p className="text-gray-500 text-sm text-center">
+                    No diaper changes in this period
+                  </p>
+                ) : (
+                  diapers.map((event, index) => (
                     <div key={event.id}>
                       <div className="flex items-center text-xs sm:text-sm gap-2 min-h-8">
                         <span className="text-gray-700 w-20 sm:w-32 text-sm flex-shrink-0">
@@ -240,45 +256,43 @@ export function Dashboard() {
                         </div>
                       )}
                     </div>
-                  ))}
-                </>
-              )}
+                  ))
+                )}
+              </div>
             </div>
-          </div>
 
-          {/* Feeds Card */}
-          <div className="bg-white border border-gray-200 rounded-lg p-4 md:p-6 shadow-sm">
-            <div className="mb-3 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-              <div className="flex-shrink-0">
-                <h3 className="text-xl md:text-2xl font-bold text-gray-900">
-                  🍼 Feeds ({feeds.length})
-                </h3>
-                <p className="text-sm text-gray-600">
-                  {totalFeedMl}ml ({totalFeedOz}oz)
-                </p>
-              </div>
-              <div className="flex gap-2 flex-wrap">
-                <div className="text-center border border-gray-200 rounded-md py-1.5 px-2.5 bg-gray-50 flex-1 sm:flex-initial min-w-24">
-                  <p className="text-xs text-gray-400 mb-0.5">Last Feed</p>
-                  <p className="text-sm font-medium text-gray-700">
-                    {lastFeed ? formatTimeSince(lastFeed.time) : 'N/A'}
+            {/* Feeds Card */}
+            <div className="bg-white border border-gray-200 rounded-lg p-4 md:p-6 shadow-sm">
+              <div className="mb-3 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                <div className="flex-shrink-0">
+                  <h3 className="text-xl md:text-2xl font-bold text-gray-900">
+                    🍼 Feeds ({feeds.length})
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    {totalFeedMl}ml ({totalFeedOz}oz)
                   </p>
                 </div>
-                <div className="text-center border border-gray-200 rounded-md py-1.5 px-2.5 bg-gray-50 flex-1 sm:flex-initial min-w-24">
-                  <p className="text-xs text-gray-400 mb-0.5">Avg Interval</p>
-                  <p className="text-sm font-medium text-gray-700">
-                    {feeds.length > 1 ? calculateAverageInterval(feeds) : 'N/A'}
-                  </p>
+                <div className="flex gap-2 flex-wrap">
+                  <div className="text-center border border-gray-200 rounded-md py-1.5 px-2.5 bg-gray-50 flex-1 sm:flex-initial min-w-24">
+                    <p className="text-xs text-gray-400 mb-0.5">Last Feed</p>
+                    <p className="text-sm font-medium text-gray-700">
+                      {lastFeed ? formatTimeSince(lastFeed.time) : 'N/A'}
+                    </p>
+                  </div>
+                  <div className="text-center border border-gray-200 rounded-md py-1.5 px-2.5 bg-gray-50 flex-1 sm:flex-initial min-w-24">
+                    <p className="text-xs text-gray-400 mb-0.5">Avg Interval</p>
+                    <p className="text-sm font-medium text-gray-700">
+                      {feeds.length > 1 ? calculateAverageInterval(feeds) : 'N/A'}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="border-t border-gray-200"></div>
-            <div className="space-y-1 pt-2">
-              {feeds.length === 0 ? (
-                <p className="text-gray-500 text-sm text-center">No feeds in this period</p>
-              ) : (
-                <>
-                  {feeds.map((feed, index) => (
+              <div className="border-t border-gray-200"></div>
+              <div className="space-y-1 pt-2">
+                {feeds.length === 0 ? (
+                  <p className="text-gray-500 text-sm text-center">No feeds in this period</p>
+                ) : (
+                  feeds.map((feed, index) => (
                     <div key={feed.id}>
                       <div className="flex items-center text-xs sm:text-sm gap-2 min-h-8">
                         <span className="text-gray-700 w-20 sm:w-32 flex-shrink-0">
@@ -302,11 +316,19 @@ export function Dashboard() {
                         </div>
                       )}
                     </div>
-                  ))}
-                </>
-              )}
+                  ))
+                )}
+              </div>
             </div>
           </div>
+
+          {/* Weekly Feed Chart */}
+          <WeeklyFeedChart
+            allEvents={allEvents}
+            weekStart={weekStart}
+            onPrevWeek={handlePrevWeek}
+            onNextWeek={handleNextWeek}
+          />
         </div>
       </main>
     </div>
