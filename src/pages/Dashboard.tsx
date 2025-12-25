@@ -212,15 +212,15 @@ export function Dashboard() {
                 </div>
                 <div className="flex gap-2 flex-wrap">
                   <div className="text-center border border-gray-200 rounded-md py-1.5 px-2.5 bg-gray-50 flex-1 sm:flex-initial min-w-24">
-                    <p className="text-xs text-gray-400 mb-0.5">Last Change</p>
-                    <p className="text-sm font-medium text-gray-700">
-                      {diapers.length > 0 ? formatTimeSince(diapers[0].time) : 'N/A'}
-                    </p>
-                  </div>
-                  <div className="text-center border border-gray-200 rounded-md py-1.5 px-2.5 bg-gray-50 flex-1 sm:flex-initial min-w-24">
                     <p className="text-xs text-gray-400 mb-0.5">Avg Interval</p>
                     <p className="text-sm font-medium text-gray-700">
                       {diapers.length > 1 ? calculateAverageInterval(diapers) : 'N/A'}
+                    </p>
+                  </div>
+                  <div className="text-center border border-gray-200 rounded-md py-1.5 px-2.5 bg-gray-50 flex-1 sm:flex-initial min-w-24">
+                    <p className="text-xs text-gray-400 mb-0.5">Last Change</p>
+                    <p className="text-sm font-medium text-gray-700">
+                      {diapers.length > 0 ? formatTimeSince(diapers[0].time) : 'N/A'}
                     </p>
                   </div>
                 </div>
@@ -274,15 +274,15 @@ export function Dashboard() {
                 </div>
                 <div className="flex gap-2 flex-wrap">
                   <div className="text-center border border-gray-200 rounded-md py-1.5 px-2.5 bg-gray-50 flex-1 sm:flex-initial min-w-24">
-                    <p className="text-xs text-gray-400 mb-0.5">Last Feed</p>
-                    <p className="text-sm font-medium text-gray-700">
-                      {lastFeed ? formatTimeSince(lastFeed.time) : 'N/A'}
-                    </p>
-                  </div>
-                  <div className="text-center border border-gray-200 rounded-md py-1.5 px-2.5 bg-gray-50 flex-1 sm:flex-initial min-w-24">
                     <p className="text-xs text-gray-400 mb-0.5">Avg Interval</p>
                     <p className="text-sm font-medium text-gray-700">
                       {feeds.length > 1 ? calculateAverageInterval(feeds) : 'N/A'}
+                    </p>
+                  </div>
+                  <div className="text-center border border-gray-200 rounded-md py-1.5 px-2.5 bg-gray-50 flex-1 sm:flex-initial min-w-24">
+                    <p className="text-xs text-gray-400 mb-0.5">Last Feed</p>
+                    <p className="text-sm font-medium text-gray-700">
+                      {lastFeed ? formatTimeSince(lastFeed.time) : 'N/A'}
                     </p>
                   </div>
                 </div>
