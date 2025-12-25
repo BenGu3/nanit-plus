@@ -53,11 +53,7 @@ export function Dashboard() {
     };
   }, [weekStart]);
 
-  const {
-    data: weekCalendarData,
-    isLoading: isLoadingWeek,
-    isFetching: isFetchingWeek,
-  } = useQuery({
+  const { data: weekCalendarData, isFetching: isFetchingWeek } = useQuery({
     queryKey: ['calendar', 'week', babyUid, weekStartTime, weekEndTime],
     queryFn: () => {
       if (!babyUid) throw new Error('No baby UID');

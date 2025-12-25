@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Bar, BarChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import type { CalendarEvent } from '@/lib/nanit-api';
 
@@ -19,6 +19,7 @@ export function WeeklyFeedChart({
   isLoading = false,
 }: WeeklyFeedChartProps) {
   const weekEnd = weekStart.plus({ days: 7 }).minus({ seconds: 1 });
+  const [unit, setUnit] = useState<'ml' | 'oz'>('ml');
 
   // Check if we're on the current week
   const now = DateTime.now();
@@ -93,54 +94,88 @@ export function WeeklyFeedChart({
       {/* Header with navigation */}
       <div className="mb-3 flex items-center justify-between">
         <h3 className="text-xl md:text-2xl font-bold text-gray-900">🍼 Weekly Feed Chart</h3>
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={onPrevWeek}
-            className="p-1.5 hover:bg-gray-100 rounded transition"
-            aria-label="Previous week"
-          >
-            <svg
-              className="w-5 h-5 text-gray-700"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              role="img"
-              aria-labelledby="prev-week-icon"
+        <div className="flex items-center gap-2">
+          {/* Unit toggle */}
+          <div className="flex gap-1 mr-2">
+            <button
+              type="button"
+              onClick={() => setUnit('ml')}
+              className={`px-2 py-1 text-xs font-medium rounded transition ${
+                unit === 'ml'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+              }`}
             >
-              <title id="prev-week-icon">Previous week</title>
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
-          </button>
-          <span className="text-sm font-medium text-gray-700 min-w-[140px] text-center">
-            {formatDateRange()}
-          </span>
-          <button
-            type="button"
-            onClick={onNextWeek}
-            disabled={isCurrentWeek}
-            className={`p-1.5 rounded transition ${
-              isCurrentWeek ? 'text-gray-300 cursor-not-allowed' : 'text-gray-700 hover:bg-gray-100'
-            }`}
-            aria-label="Next week"
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              role="img"
-              aria-labelledby="next-week-icon"
+              ml
+            </button>
+            <button
+              type="button"
+              onClick={() => setUnit('oz')}
+              className={`px-2 py-1 text-xs font-medium rounded transition ${
+                unit === 'oz'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+              }`}
             >
-              <title id="next-week-icon">Next week</title>
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
+              oz
+            </button>
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={onPrevWeek}
+              className="p-1.5 hover:bg-gray-100 rounded transition"
+              aria-label="Previous week"
+            >
+              <svg
+                className="w-5 h-5 text-gray-700"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                role="img"
+                aria-labelledby="prev-week-icon"
+              >
+                <title id="prev-week-icon">Previous week</title>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+            </button>
+            <span className="text-sm font-medium text-gray-700 min-w-[140px] text-center">
+              {formatDateRange()}
+            </span>
+            <button
+              type="button"
+              onClick={onNextWeek}
+              disabled={isCurrentWeek}
+              className={`p-1.5 rounded transition ${
+                isCurrentWeek
+                  ? 'text-gray-300 cursor-not-allowed'
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+              aria-label="Next week"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                role="img"
+                aria-labelledby="next-week-icon"
+              >
+                <title id="next-week-icon">Next week</title>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -207,9 +242,11 @@ export function WeeklyFeedChart({
               />
               <YAxis
                 tick={({ x, y, payload }) => {
+                  const value = unit === 'oz' ? mlToOz(payload.value) : payload.value;
                   return (
                     <text x={x} y={y} textAnchor="end" fill="#6b7280" fontSize={11} dy={4}>
-                      {payload.value}ml
+                      {value}
+                      {unit}
                     </text>
                   );
                 }}
@@ -234,12 +271,15 @@ export function WeeklyFeedChart({
                     );
                   }
 
+                  const displayValue =
+                    unit === 'oz'
+                      ? `${mlToOz(data.ml)}oz (${Math.round(data.ml)}ml)`
+                      : `${Math.round(data.ml)}ml (${mlToOz(data.ml)}oz)`;
+
                   return (
                     <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-lg">
                       <p className="text-sm font-medium text-gray-900">{displayTime}</p>
-                      <p className="text-sm font-semibold text-blue-600">
-                        {Math.round(data.ml)}ml ({mlToOz(data.ml)}oz)
-                      </p>
+                      <p className="text-sm font-semibold text-blue-600">{displayValue}</p>
                     </div>
                   );
                 }}
