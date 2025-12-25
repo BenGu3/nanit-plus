@@ -104,7 +104,7 @@ export function Dashboard() {
 
   const getDiaperEmoji = (changeType?: string) => {
     if (changeType === 'pee') return '💧';
-    if (changeType === 'poop') return '💩';
+    if (changeType === 'poo') return '💩';
     if (changeType === 'mixed') return '💧💩';
     return '?';
   };
