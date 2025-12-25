@@ -1,4 +1,4 @@
-import * as nanitAPI from './nanit-api';
+import * as nanitAPI from './nanit-api.js';
 
 export async function handleGetBabies(token: string) {
   if (!token) {

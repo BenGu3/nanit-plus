@@ -1,4 +1,4 @@
-import * as nanitAPI from './nanit-api';
+import * as nanitAPI from './nanit-api.js';
 
 export async function handleLogin(email: string, password: string) {
   const result = (await nanitAPI.login(email, password)) as {
