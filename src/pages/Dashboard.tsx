@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { DateTime } from 'luxon';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { nanitAPI } from '@/api';
 import { WeeklyFeedChart } from '@/components/WeeklyFeedChart';
@@ -9,12 +9,41 @@ export function Dashboard() {
   const navigate = useNavigate();
   const [timeRange, setTimeRange] = useState<12 | 24>(12);
 
+  // Add a refresh key that updates to trigger "now" recalculation
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [lastBlurTime, setLastBlurTime] = useState<number | null>(null);
+
   // Week navigation state - start with current week (Sunday-Saturday)
   const [weekStart, setWeekStart] = useState(() => {
     const now = DateTime.now();
     // Get Sunday of current week
     return now.startOf('week').minus({ days: 1 }); // Luxon week starts Monday, so minus 1 to get Sunday
   });
+
+  // Listen for window focus/blur to update refresh key only if away for >1 minute
+  useEffect(() => {
+    const handleBlur = () => {
+      setLastBlurTime(Date.now());
+    };
+
+    const handleFocus = () => {
+      if (lastBlurTime !== null) {
+        const timeAway = Date.now() - lastBlurTime;
+        const oneMinute = 60 * 1000;
+
+        if (timeAway > oneMinute) {
+          setRefreshKey((prev) => prev + 1);
+        }
+      }
+    };
+
+    window.addEventListener('blur', handleBlur);
+    window.addEventListener('focus', handleFocus);
+    return () => {
+      window.removeEventListener('blur', handleBlur);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [lastBlurTime]);
 
   const { data: babiesData } = useQuery({
     queryKey: ['babies'],
@@ -24,15 +53,15 @@ export function Dashboard() {
 
   const babyUid = babiesData?.babies[0]?.uid;
 
-  const now = useMemo(() => DateTime.now(), []);
-
-  // Fetch last 24 hours for diapers/feeds cards
+  // Calculate time range for recent data - recalculate on refresh
+  // biome-ignore lint/correctness/useExhaustiveDependencies: refreshKey intentionally triggers recalculation
   const { recentStartTime, recentEndTime } = useMemo(() => {
+    const currentTime = DateTime.now();
     return {
-      recentStartTime: now.minus({ hours: 24 }).toUnixInteger(),
-      recentEndTime: now.toUnixInteger(),
+      recentStartTime: currentTime.minus({ hours: 24 }).toUnixInteger(),
+      recentEndTime: currentTime.toUnixInteger(),
     };
-  }, [now]);
+  }, [refreshKey]); // Recalculate when refreshKey changes
 
   const { data: recentCalendarData, isLoading: isLoadingRecent } = useQuery({
     queryKey: ['calendar', 'recent', babyUid, recentStartTime, recentEndTime],
@@ -45,6 +74,10 @@ export function Dashboard() {
     gcTime: 1000 * 60 * 10, // Keep in cache for 10 minutes
     refetchOnWindowFocus: true,
   });
+
+  // Recalculate 'now' whenever refreshKey changes to update all "time ago" displays
+  // biome-ignore lint/correctness/useExhaustiveDependencies: refreshKey intentionally triggers recalculation
+  const now = useMemo(() => DateTime.now(), [refreshKey]);
 
   // Fetch data for the selected week for the chart
   const { weekStartTime, weekEndTime } = useMemo(() => {
