@@ -77,3 +77,13 @@ export async function getCalendar(token: string, babyUid: string, start: number,
     },
   });
 }
+
+export async function refreshToken(accessToken: string, refreshToken: string) {
+  return nanitFetch('/tokens/refresh', accessToken, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ refresh_token: refreshToken }),
+  });
+}

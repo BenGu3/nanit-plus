@@ -1,6 +1,7 @@
 export interface LoginResponse {
   access_token?: string;
   token?: string;
+  refresh_token?: string;
   mfa_token?: string;
   phone_suffix?: string;
   channel?: string;

@@ -24,3 +24,11 @@ export async function handleVerifyMFA(
     status: 200,
   };
 }
+
+export async function handleRefreshToken(accessToken: string, refreshToken: string) {
+  const result = await nanitAPI.refreshToken(accessToken, refreshToken);
+  return {
+    data: result,
+    status: 200,
+  };
+}
