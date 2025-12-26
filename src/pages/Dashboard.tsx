@@ -19,6 +19,7 @@ export function Dashboard() {
   const { data: babiesData } = useQuery({
     queryKey: ['babies'],
     queryFn: () => nanitAPI.getBabies(),
+    refetchOnWindowFocus: true,
   });
 
   const babyUid = babiesData?.babies[0]?.uid;
@@ -40,8 +41,9 @@ export function Dashboard() {
       return nanitAPI.getCalendar(babyUid, recentStartTime, recentEndTime);
     },
     enabled: !!babyUid,
-    staleTime: 1000 * 60 * 2, // Consider data fresh for 2 minutes
+    staleTime: 0, // Always consider data stale to refetch on focus
     gcTime: 1000 * 60 * 10, // Keep in cache for 10 minutes
+    refetchOnWindowFocus: true,
   });
 
   // Fetch data for the selected week for the chart
@@ -60,8 +62,9 @@ export function Dashboard() {
       return nanitAPI.getCalendar(babyUid, weekStartTime, weekEndTime);
     },
     enabled: !!babyUid,
-    staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
+    staleTime: 0, // Always consider data stale to refetch on focus
     gcTime: 1000 * 60 * 30, // Keep in cache for 30 minutes
+    refetchOnWindowFocus: true,
   });
 
   const handleSignOut = () => {
