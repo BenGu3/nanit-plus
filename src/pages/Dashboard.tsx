@@ -16,8 +16,8 @@ export function Dashboard() {
   // Week navigation state - start with current week (Sunday-Saturday)
   const [weekStart, setWeekStart] = useState(() => {
     const now = DateTime.now();
-    // Get Sunday of current week
-    return now.startOf('week').minus({ days: 1 }); // Luxon week starts Monday, so minus 1 to get Sunday
+    // Get Sunday of current week - if today is Sunday (weekday 7), use today, otherwise get previous Sunday
+    return now.weekday === 7 ? now.startOf('day') : now.startOf('week').minus({ days: 1 });
   });
 
   // Day navigation state - start with today
@@ -82,20 +82,27 @@ export function Dashboard() {
   // biome-ignore lint/correctness/useExhaustiveDependencies: refreshKey intentionally triggers recalculation
   const now = useMemo(() => DateTime.now(), [refreshKey]);
 
-  // Fetch data for the selected week for the chart
-  const { weekStartTime, weekEndTime } = useMemo(() => {
+  // Fetch data for the selected week/day for the chart
+  // Need to cover both weekStart and dayStart ranges
+  const { chartStartTime, chartEndTime } = useMemo(() => {
     const weekEnd = weekStart.plus({ days: 7 });
-    return {
-      weekStartTime: weekStart.toUnixInteger(),
-      weekEndTime: weekEnd.toUnixInteger(),
-    };
-  }, [weekStart]);
+    const dayEnd = dayStart.plus({ days: 1 });
 
-  const { data: weekCalendarData, isFetching: isFetchingWeek } = useQuery({
-    queryKey: ['calendar', 'week', babyUid, weekStartTime, weekEndTime],
+    // Get the earliest start and latest end between week and day ranges
+    const earliestStart = weekStart < dayStart ? weekStart : dayStart;
+    const latestEnd = weekEnd > dayEnd ? weekEnd : dayEnd;
+
+    return {
+      chartStartTime: earliestStart.toUnixInteger(),
+      chartEndTime: latestEnd.toUnixInteger(),
+    };
+  }, [weekStart, dayStart]);
+
+  const { data: chartCalendarData, isFetching: isFetchingChart } = useQuery({
+    queryKey: ['calendar', 'chart', babyUid, chartStartTime, chartEndTime],
     queryFn: () => {
       if (!babyUid) throw new Error('No baby UID');
-      return nanitAPI.getCalendar(babyUid, weekStartTime, weekEndTime);
+      return nanitAPI.getCalendar(babyUid, chartStartTime, chartEndTime);
     },
     enabled: !!babyUid,
     staleTime: 0, // Always consider data stale to refetch on focus
@@ -127,8 +134,8 @@ export function Dashboard() {
   // Get events from recent data for diapers/feeds cards
   const recentEvents = recentCalendarData?.calendar || [];
 
-  // Get events from week data for the chart
-  const weekEvents = weekCalendarData?.calendar || [];
+  // Get events from chart data (covers both week and day ranges)
+  const chartEvents = chartCalendarData?.calendar || [];
 
   const lastPoop = useMemo(() => {
     return recentEvents
@@ -403,14 +410,14 @@ export function Dashboard() {
 
           {/* Feed Chart */}
           <FeedChart
-            allEvents={weekEvents}
+            allEvents={chartEvents}
             weekStart={weekStart}
             dayStart={dayStart}
             onPrevWeek={handlePrevWeek}
             onNextWeek={handleNextWeek}
             onPrevDay={handlePrevDay}
             onNextDay={handleNextDay}
-            isLoading={isFetchingWeek}
+            isLoading={isFetchingChart}
           />
         </div>
       </main>

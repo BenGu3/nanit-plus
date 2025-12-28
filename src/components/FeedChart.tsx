@@ -41,8 +41,11 @@ export function FeedChart({
   }, []);
 
   const now = DateTime.now();
-  const currentWeekStart = now.startOf('week').minus({ days: 1 });
-  const isCurrentWeek = weekStart.hasSame(currentWeekStart, 'day');
+  // Get Sunday of the week containing today
+  const currentWeekStart =
+    now.weekday === 7 ? now.startOf('day') : now.startOf('week').minus({ days: 1 });
+  // Disable next if we're already viewing the current week (the week that contains today)
+  const isCurrentOrFutureWeek = weekStart >= currentWeekStart;
   const isToday = dayStart.hasSame(now, 'day');
 
   const formatDateRange = () => {
@@ -71,7 +74,7 @@ export function FeedChart({
     }
   };
 
-  const isNextDisabled = view === 'daily' ? isToday : isCurrentWeek;
+  const isNextDisabled = view === 'daily' ? isToday : isCurrentOrFutureWeek;
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-3 md:p-4 shadow-sm">
