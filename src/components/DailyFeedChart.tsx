@@ -71,8 +71,12 @@ export function DailyFeedChart({
       }
     }
 
-    // Add avgMl property to each bucket
-    return buckets.map((b) => ({ ...b, avgMl: null as number | null }));
+    // Add avgMl and totalMl properties to each bucket (will be calculated later)
+    return buckets.map((b) => ({
+      ...b,
+      avgMl: null as number | null,
+      totalMl: null as number | null,
+    }));
   }, [allEvents, dayStart, dayEnd]);
 
   // Calculate reference lines at 12am and 12pm
@@ -108,20 +112,22 @@ export function DailyFeedChart({
     const eveningCount = eveningData.filter((d) => d.ml > 0).length;
     const eveningAvg = eveningCount > 0 ? eveningTotal / eveningCount : 0;
 
-    // Fill average for morning period
+    // Fill average and total for morning period
     if (morningAvg > 0) {
       for (const point of dataWithAvg) {
         if (point.hourTimestamp >= morningStart && point.hourTimestamp < morningEnd) {
           point.avgMl = morningAvg;
+          point.totalMl = morningTotal;
         }
       }
     }
 
-    // Fill average for evening period
+    // Fill average and total for evening period
     if (eveningAvg > 0) {
       for (const point of dataWithAvg) {
         if (point.hourTimestamp >= eveningStart && point.hourTimestamp < eveningEnd) {
           point.avgMl = eveningAvg;
+          point.totalMl = eveningTotal;
         }
       }
     }
@@ -207,12 +213,21 @@ export function DailyFeedChart({
                       : `${Math.round(data.avgMl)}ml (${mlToOz(data.avgMl)}oz)`
                     : null;
 
+                  const totalValue = data.totalMl
+                    ? unit === 'oz'
+                      ? `${mlToOz(data.totalMl)}oz (${Math.round(data.totalMl)}ml)`
+                      : `${Math.round(data.totalMl)}ml (${mlToOz(data.totalMl)}oz)`
+                    : null;
+
                   if (!data.ml || data.ml === 0) {
                     return (
                       <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-lg">
                         <p className="text-sm font-medium text-gray-900 mb-2">{displayTime}</p>
                         <p className="text-sm text-gray-500">No feeds this hour</p>
                         {avgValue && <p className="text-sm text-amber-600">12hr avg: {avgValue}</p>}
+                        {totalValue && (
+                          <p className="text-sm text-amber-600">12hr total: {totalValue}</p>
+                        )}
                       </div>
                     );
                   }
@@ -227,6 +242,9 @@ export function DailyFeedChart({
                       <p className="text-sm font-medium text-gray-900 mb-2">{displayTime}</p>
                       <p className="text-sm font-semibold text-blue-600">{displayValue}</p>
                       {avgValue && <p className="text-sm text-amber-600">12hr avg: {avgValue}</p>}
+                      {totalValue && (
+                        <p className="text-sm text-amber-600">12hr total: {totalValue}</p>
+                      )}
                     </div>
                   );
                 }}
