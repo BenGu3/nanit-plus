@@ -3,7 +3,7 @@ import { DateTime } from 'luxon';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { nanitAPI } from '@/api';
-import { WeeklyFeedChart } from '@/components/WeeklyFeedChart';
+import { FeedChart } from '@/components/FeedChart';
 
 export function Dashboard() {
   const navigate = useNavigate();
@@ -19,6 +19,9 @@ export function Dashboard() {
     // Get Sunday of current week
     return now.startOf('week').minus({ days: 1 }); // Luxon week starts Monday, so minus 1 to get Sunday
   });
+
+  // Day navigation state - start with today
+  const [dayStart, setDayStart] = useState(() => DateTime.now().startOf('day'));
 
   // Listen for window focus/blur to update refresh key only if away for >1 minute
   useEffect(() => {
@@ -111,6 +114,14 @@ export function Dashboard() {
 
   const handleNextWeek = () => {
     setWeekStart((prev) => prev.plus({ weeks: 1 }));
+  };
+
+  const handlePrevDay = () => {
+    setDayStart((prev) => prev.minus({ days: 1 }));
+  };
+
+  const handleNextDay = () => {
+    setDayStart((prev) => prev.plus({ days: 1 }));
   };
 
   // Get events from recent data for diapers/feeds cards
@@ -390,12 +401,15 @@ export function Dashboard() {
             </div>
           </div>
 
-          {/* Weekly Feed Chart */}
-          <WeeklyFeedChart
+          {/* Feed Chart */}
+          <FeedChart
             allEvents={weekEvents}
             weekStart={weekStart}
+            dayStart={dayStart}
             onPrevWeek={handlePrevWeek}
             onNextWeek={handleNextWeek}
+            onPrevDay={handlePrevDay}
+            onNextDay={handleNextDay}
             isLoading={isFetchingWeek}
           />
         </div>

@@ -12,40 +12,36 @@ import {
 } from 'recharts';
 import type { CalendarEvent } from '@/api';
 
-interface WeeklyFeedChartProps {
+interface DailyFeedChartProps {
   allEvents: CalendarEvent[];
-  weekStart: DateTime;
+  dayStart: DateTime;
   unit: 'ml' | 'oz';
   isLoading?: boolean;
 }
 
-export function WeeklyFeedChart({
+export function DailyFeedChart({
   allEvents,
-  weekStart,
+  dayStart,
   unit,
   isLoading = false,
-}: WeeklyFeedChartProps) {
-  const weekEnd = weekStart.plus({ days: 7 }).minus({ seconds: 1 });
+}: DailyFeedChartProps) {
+  const dayEnd = dayStart.plus({ days: 1 }).minus({ seconds: 1 });
 
   const chartData = useMemo(() => {
     const buckets: Array<{
       hourTimestamp: number;
       ml: number;
       hour: number;
-      dayOfWeek: number;
     }> = [];
 
-    // Create 168 hourly buckets (7 days × 24 hours)
-    for (let day = 0; day < 7; day++) {
-      for (let hour = 0; hour < 24; hour++) {
-        const hourStart = weekStart.plus({ days: day, hours: hour });
-        buckets.push({
-          hourTimestamp: hourStart.toUnixInteger(),
-          ml: 0,
-          hour,
-          dayOfWeek: hourStart.weekday % 7, // Convert to 0=Sunday
-        });
-      }
+    // Create 24 hourly buckets
+    for (let hour = 0; hour < 24; hour++) {
+      const hourStart = dayStart.plus({ hours: hour });
+      buckets.push({
+        hourTimestamp: hourStart.toUnixInteger(),
+        ml: 0,
+        hour,
+      });
     }
 
     // Fill buckets with feed data
@@ -54,10 +50,9 @@ export function WeeklyFeedChart({
     for (const feed of feeds) {
       const feedTime = DateTime.fromSeconds(feed.time);
 
-      // Only include feeds in this week
-      if (feedTime < weekStart || feedTime > weekEnd) continue;
+      // Only include feeds in this day
+      if (feedTime < dayStart || feedTime > dayEnd) continue;
 
-      // Find the matching hour bucket
       const feedHourStart = feedTime.startOf('hour');
       const bucket = buckets.find((b) => b.hourTimestamp === feedHourStart.toUnixInteger());
 
@@ -66,67 +61,63 @@ export function WeeklyFeedChart({
       }
     }
 
-    // Add avgMl property to each bucket (will be calculated later)
+    // Add avgMl property to each bucket
     return buckets.map((b) => ({ ...b, avgMl: null as number | null }));
-  }, [allEvents, weekStart, weekEnd]);
+  }, [allEvents, dayStart, dayEnd]);
 
-  // Calculate 12am and 12pm timestamps for reference lines
+  // Calculate reference lines at 12am and 12pm
   const referenceLines = useMemo(() => {
-    const lines: number[] = [];
-    for (let day = 0; day < 7; day++) {
-      const midnight = weekStart.plus({ days: day, hours: 0 }).toUnixInteger();
-      const noon = weekStart.plus({ days: day, hours: 12 }).toUnixInteger();
-      lines.push(midnight, noon);
-    }
-    return lines;
-  }, [weekStart]);
+    return [
+      dayStart
+        .plus({ hours: 12 })
+        .toUnixInteger(), // 12pm
+    ];
+  }, [dayStart]);
 
-  // Calculate average feed amount per 12-hour period and add to chart data
+  // Calculate average feed amount per 12-hour period
   const chartDataWithAvg = useMemo(() => {
     const dataWithAvg = [...chartData];
 
-    for (let day = 0; day < 7; day++) {
-      // Morning period (12am - 12pm)
-      const morningStart = weekStart.plus({ days: day, hours: 0 }).toUnixInteger();
-      const morningEnd = weekStart.plus({ days: day, hours: 12 }).toUnixInteger();
-      const morningData = dataWithAvg.filter(
-        (d) => d.hourTimestamp >= morningStart && d.hourTimestamp < morningEnd,
-      );
-      const morningTotal = morningData.reduce((sum, d) => sum + d.ml, 0);
-      const morningCount = morningData.filter((d) => d.ml > 0).length;
-      const morningAvg = morningCount > 0 ? morningTotal / morningCount : 0;
+    // Morning period (12am - 12pm)
+    const morningStart = dayStart.toUnixInteger();
+    const morningEnd = dayStart.plus({ hours: 12 }).toUnixInteger();
+    const morningData = dataWithAvg.filter(
+      (d) => d.hourTimestamp >= morningStart && d.hourTimestamp < morningEnd,
+    );
+    const morningTotal = morningData.reduce((sum, d) => sum + d.ml, 0);
+    const morningCount = morningData.filter((d) => d.ml > 0).length;
+    const morningAvg = morningCount > 0 ? morningTotal / morningCount : 0;
 
-      // Afternoon/Evening period (12pm - 12am)
-      const eveningStart = weekStart.plus({ days: day, hours: 12 }).toUnixInteger();
-      const eveningEnd = weekStart.plus({ days: day + 1, hours: 0 }).toUnixInteger();
-      const eveningData = dataWithAvg.filter(
-        (d) => d.hourTimestamp >= eveningStart && d.hourTimestamp < eveningEnd,
-      );
-      const eveningTotal = eveningData.reduce((sum, d) => sum + d.ml, 0);
-      const eveningCount = eveningData.filter((d) => d.ml > 0).length;
-      const eveningAvg = eveningCount > 0 ? eveningTotal / eveningCount : 0;
+    // Afternoon/Evening period (12pm - 12am)
+    const eveningStart = dayStart.plus({ hours: 12 }).toUnixInteger();
+    const eveningEnd = dayStart.plus({ days: 1 }).toUnixInteger();
+    const eveningData = dataWithAvg.filter(
+      (d) => d.hourTimestamp >= eveningStart && d.hourTimestamp < eveningEnd,
+    );
+    const eveningTotal = eveningData.reduce((sum, d) => sum + d.ml, 0);
+    const eveningCount = eveningData.filter((d) => d.ml > 0).length;
+    const eveningAvg = eveningCount > 0 ? eveningTotal / eveningCount : 0;
 
-      // Fill average for morning period
-      if (morningAvg > 0) {
-        for (const point of dataWithAvg) {
-          if (point.hourTimestamp >= morningStart && point.hourTimestamp < morningEnd) {
-            point.avgMl = morningAvg;
-          }
+    // Fill average for morning period
+    if (morningAvg > 0) {
+      for (const point of dataWithAvg) {
+        if (point.hourTimestamp >= morningStart && point.hourTimestamp < morningEnd) {
+          point.avgMl = morningAvg;
         }
       }
+    }
 
-      // Fill average for evening period
-      if (eveningAvg > 0) {
-        for (const point of dataWithAvg) {
-          if (point.hourTimestamp >= eveningStart && point.hourTimestamp < eveningEnd) {
-            point.avgMl = eveningAvg;
-          }
+    // Fill average for evening period
+    if (eveningAvg > 0) {
+      for (const point of dataWithAvg) {
+        if (point.hourTimestamp >= eveningStart && point.hourTimestamp < eveningEnd) {
+          point.avgMl = eveningAvg;
         }
       }
     }
 
     return dataWithAvg;
-  }, [chartData, weekStart]);
+  }, [chartData, dayStart]);
 
   const hasData = chartDataWithAvg.some((d) => d.ml > 0);
 
@@ -144,7 +135,7 @@ export function WeeklyFeedChart({
         </div>
       ) : !hasData ? (
         <div className="flex items-center justify-center h-64 text-gray-500">
-          <p className="text-sm">No feeds this week</p>
+          <p className="text-sm">No feeds this day</p>
         </div>
       ) : (
         <div>
@@ -158,37 +149,17 @@ export function WeeklyFeedChart({
                 type="number"
                 domain={['dataMin', 'dataMax']}
                 scale="linear"
-                ticks={chartDataWithAvg
-                  .filter((d) => d.hour === 0 || d.hour === 12)
-                  .map((d) => d.hourTimestamp)}
+                ticks={chartDataWithAvg.filter((d) => d.hour % 3 === 0).map((d) => d.hourTimestamp)}
                 tick={(props) => {
                   const { x, y, payload } = props;
                   const dt = DateTime.fromSeconds(payload.value);
-                  const hour = dt.hour;
-
-                  // Show day name at midnight (hour 0)
-                  if (hour === 0) {
-                    return (
-                      <g transform={`translate(${x},${y})`}>
-                        <text x={0} y={15} textAnchor="middle" fill="#6b7280" fontSize={11}>
-                          {dt.toFormat('EEE d')}
-                        </text>
-                      </g>
-                    );
-                  }
-
-                  // Show "12pm" at noon (hour 12)
-                  if (hour === 12) {
-                    return (
-                      <g transform={`translate(${x},${y})`}>
-                        <text x={0} y={15} textAnchor="middle" fill="#6b7280" fontSize={11}>
-                          12pm
-                        </text>
-                      </g>
-                    );
-                  }
-
-                  return null;
+                  return (
+                    <g transform={`translate(${x},${y})`}>
+                      <text x={0} y={15} textAnchor="middle" fill="#6b7280" fontSize={11}>
+                        {dt.toFormat('ha')}
+                      </text>
+                    </g>
+                  );
                 }}
                 axisLine={{ stroke: '#e5e7eb' }}
                 tickLine={{ stroke: '#e5e7eb', strokeWidth: 1 }}
@@ -248,7 +219,7 @@ export function WeeklyFeedChart({
                   );
                 }}
               />
-              {/* Reference lines at 12am and 12pm each day */}
+              {/* Reference line at 12pm */}
               {referenceLines.map((timestamp) => (
                 <ReferenceLine
                   key={timestamp}
@@ -258,7 +229,7 @@ export function WeeklyFeedChart({
                   strokeWidth={1}
                 />
               ))}
-              <Bar dataKey="ml" fill="#3b82f6" radius={[2, 2, 0, 0]} barSize={6} />
+              <Bar dataKey="ml" fill="#3b82f6" radius={[2, 2, 0, 0]} barSize={12} />
               <Line
                 dataKey="avgMl"
                 stroke="#f59e0b"
