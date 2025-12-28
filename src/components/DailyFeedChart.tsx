@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Bar,
   ComposedChart,
@@ -26,6 +26,16 @@ export function DailyFeedChart({
   isLoading = false,
 }: DailyFeedChartProps) {
   const dayEnd = dayStart.plus({ days: 1 }).minus({ seconds: 1 });
+
+  // Detect mobile
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const chartData = useMemo(() => {
     const buckets: Array<{
@@ -139,10 +149,10 @@ export function DailyFeedChart({
         </div>
       ) : (
         <div>
-          <ResponsiveContainer width="100%" height={400}>
+          <ResponsiveContainer width="100%" height={300} className="sm:h-[350px] md:h-[400px]">
             <ComposedChart
               data={chartDataWithAvg}
-              margin={{ top: 5, right: 5, left: 5, bottom: 35 }}
+              margin={{ top: 5, right: 5, left: 0, bottom: 35 }}
             >
               <XAxis
                 dataKey="hourTimestamp"
@@ -155,7 +165,7 @@ export function DailyFeedChart({
                   const dt = DateTime.fromSeconds(payload.value);
                   return (
                     <g transform={`translate(${x},${y})`}>
-                      <text x={0} y={15} textAnchor="middle" fill="#6b7280" fontSize={11}>
+                      <text x={0} y={15} textAnchor="middle" fill="#6b7280" fontSize={10}>
                         {dt.toFormat('ha')}
                       </text>
                     </g>
@@ -163,15 +173,15 @@ export function DailyFeedChart({
                 }}
                 axisLine={{ stroke: '#e5e7eb' }}
                 tickLine={{ stroke: '#e5e7eb', strokeWidth: 1 }}
-                height={60}
+                height={50}
                 interval={0}
-                minTickGap={0}
+                minTickGap={5}
               />
               <YAxis
                 tick={({ x, y, payload }) => {
                   const value = unit === 'oz' ? mlToOz(payload.value) : payload.value;
                   return (
-                    <text x={x} y={y} textAnchor="end" fill="#6b7280" fontSize={11} dy={4}>
+                    <text x={x} y={y} textAnchor="end" fill="#6b7280" fontSize={10} dy={4}>
                       {value}
                       {unit}
                     </text>
@@ -179,6 +189,8 @@ export function DailyFeedChart({
                 }}
                 axisLine={false}
                 tickLine={false}
+                width={isMobile ? 45 : 55}
+                tickCount={isMobile ? 4 : 5}
               />
               <Tooltip
                 cursor={{ fill: 'rgba(59, 130, 246, 0.1)' }}

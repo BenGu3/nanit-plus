@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Bar,
   ComposedChart,
@@ -26,6 +26,16 @@ export function WeeklyFeedChart({
   isLoading = false,
 }: WeeklyFeedChartProps) {
   const weekEnd = weekStart.plus({ days: 7 }).minus({ seconds: 1 });
+
+  // Detect mobile
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const chartData = useMemo(() => {
     const buckets: Array<{
@@ -148,10 +158,10 @@ export function WeeklyFeedChart({
         </div>
       ) : (
         <div>
-          <ResponsiveContainer width="100%" height={400}>
+          <ResponsiveContainer width="100%" height={300} className="sm:h-[350px] md:h-[400px]">
             <ComposedChart
               data={chartDataWithAvg}
-              margin={{ top: 5, right: 5, left: 5, bottom: 35 }}
+              margin={{ top: 5, right: 5, left: 0, bottom: 35 }}
             >
               <XAxis
                 dataKey="hourTimestamp"
@@ -159,48 +169,56 @@ export function WeeklyFeedChart({
                 domain={['dataMin', 'dataMax']}
                 scale="linear"
                 ticks={chartDataWithAvg
-                  .filter((d) => d.hour === 0 || d.hour === 12)
+                  .filter((d) => (isMobile ? d.hour === 0 : d.hour === 0 || d.hour === 12))
                   .map((d) => d.hourTimestamp)}
                 tick={(props) => {
                   const { x, y, payload } = props;
                   const dt = DateTime.fromSeconds(payload.value);
                   const hour = dt.hour;
 
-                  // Show day name at midnight (hour 0)
-                  if (hour === 0) {
-                    return (
-                      <g transform={`translate(${x},${y})`}>
-                        <text x={0} y={15} textAnchor="middle" fill="#6b7280" fontSize={11}>
-                          {dt.toFormat('EEE d')}
-                        </text>
-                      </g>
-                    );
+                  // Desktop: show day name at midnight, "12pm" at noon
+                  if (!isMobile) {
+                    if (hour === 0) {
+                      return (
+                        <g transform={`translate(${x},${y})`}>
+                          <text x={0} y={15} textAnchor="middle" fill="#6b7280" fontSize={10}>
+                            {dt.toFormat('EEE d')}
+                          </text>
+                        </g>
+                      );
+                    }
+                    if (hour === 12) {
+                      return (
+                        <g transform={`translate(${x},${y})`}>
+                          <text x={0} y={15} textAnchor="middle" fill="#6b7280" fontSize={10}>
+                            12pm
+                          </text>
+                        </g>
+                      );
+                    }
+                    return null;
                   }
 
-                  // Show "12pm" at noon (hour 12)
-                  if (hour === 12) {
-                    return (
-                      <g transform={`translate(${x},${y})`}>
-                        <text x={0} y={15} textAnchor="middle" fill="#6b7280" fontSize={11}>
-                          12pm
-                        </text>
-                      </g>
-                    );
-                  }
-
-                  return null;
+                  // Mobile: only show day of week (no day number)
+                  return (
+                    <g transform={`translate(${x},${y})`}>
+                      <text x={0} y={15} textAnchor="middle" fill="#6b7280" fontSize={10}>
+                        {dt.toFormat('EEE')}
+                      </text>
+                    </g>
+                  );
                 }}
                 axisLine={{ stroke: '#e5e7eb' }}
                 tickLine={{ stroke: '#e5e7eb', strokeWidth: 1 }}
-                height={60}
+                height={50}
                 interval={0}
-                minTickGap={0}
+                minTickGap={5}
               />
               <YAxis
                 tick={({ x, y, payload }) => {
                   const value = unit === 'oz' ? mlToOz(payload.value) : payload.value;
                   return (
-                    <text x={x} y={y} textAnchor="end" fill="#6b7280" fontSize={11} dy={4}>
+                    <text x={x} y={y} textAnchor="end" fill="#6b7280" fontSize={10} dy={4}>
                       {value}
                       {unit}
                     </text>
@@ -208,6 +226,8 @@ export function WeeklyFeedChart({
                 }}
                 axisLine={false}
                 tickLine={false}
+                width={isMobile ? 45 : 55}
+                tickCount={isMobile ? 4 : 5}
               />
               <Tooltip
                 cursor={{ fill: 'rgba(59, 130, 246, 0.1)' }}
