@@ -1,6 +1,15 @@
 import { DateTime } from 'luxon';
 import { useMemo, useState } from 'react';
-import { Bar, BarChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import {
+  Bar,
+  ComposedChart,
+  Line,
+  ReferenceLine,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 import type { CalendarEvent } from '@/api';
 
 interface WeeklyFeedChartProps {
@@ -65,10 +74,9 @@ export function WeeklyFeedChart({
       }
     }
 
-    return buckets;
+    // Add avgMl property to each bucket (will be calculated later)
+    return buckets.map((b) => ({ ...b, avgMl: null as number | null }));
   }, [allEvents, weekStart, weekEnd]);
-
-  const hasData = chartData.some((d) => d.ml > 0);
 
   // Calculate 12am and 12pm timestamps for reference lines
   const referenceLines = useMemo(() => {
@@ -80,6 +88,55 @@ export function WeeklyFeedChart({
     }
     return lines;
   }, [weekStart]);
+
+  // Calculate average feed amount per 12-hour period and add to chart data
+  const chartDataWithAvg = useMemo(() => {
+    const dataWithAvg = [...chartData];
+
+    for (let day = 0; day < 7; day++) {
+      // Morning period (12am - 12pm)
+      const morningStart = weekStart.plus({ days: day, hours: 0 }).toUnixInteger();
+      const morningEnd = weekStart.plus({ days: day, hours: 12 }).toUnixInteger();
+      const morningData = dataWithAvg.filter(
+        (d) => d.hourTimestamp >= morningStart && d.hourTimestamp < morningEnd,
+      );
+      const morningTotal = morningData.reduce((sum, d) => sum + d.ml, 0);
+      const morningCount = morningData.filter((d) => d.ml > 0).length;
+      const morningAvg = morningCount > 0 ? morningTotal / morningCount : 0;
+
+      // Afternoon/Evening period (12pm - 12am)
+      const eveningStart = weekStart.plus({ days: day, hours: 12 }).toUnixInteger();
+      const eveningEnd = weekStart.plus({ days: day + 1, hours: 0 }).toUnixInteger();
+      const eveningData = dataWithAvg.filter(
+        (d) => d.hourTimestamp >= eveningStart && d.hourTimestamp < eveningEnd,
+      );
+      const eveningTotal = eveningData.reduce((sum, d) => sum + d.ml, 0);
+      const eveningCount = eveningData.filter((d) => d.ml > 0).length;
+      const eveningAvg = eveningCount > 0 ? eveningTotal / eveningCount : 0;
+
+      // Fill average for morning period
+      if (morningAvg > 0) {
+        for (const point of dataWithAvg) {
+          if (point.hourTimestamp >= morningStart && point.hourTimestamp < morningEnd) {
+            point.avgMl = morningAvg;
+          }
+        }
+      }
+
+      // Fill average for evening period
+      if (eveningAvg > 0) {
+        for (const point of dataWithAvg) {
+          if (point.hourTimestamp >= eveningStart && point.hourTimestamp < eveningEnd) {
+            point.avgMl = eveningAvg;
+          }
+        }
+      }
+    }
+
+    return dataWithAvg;
+  }, [chartData, weekStart]);
+
+  const hasData = chartDataWithAvg.some((d) => d.ml > 0);
 
   const formatDateRange = () => {
     const start = weekStart.toFormat('MMM d');
@@ -196,13 +253,16 @@ export function WeeklyFeedChart({
       ) : (
         <div className="pt-2">
           <ResponsiveContainer width="100%" height={400}>
-            <BarChart data={chartData} margin={{ top: 5, right: 5, left: 5, bottom: 35 }}>
+            <ComposedChart
+              data={chartDataWithAvg}
+              margin={{ top: 5, right: 5, left: 5, bottom: 35 }}
+            >
               <XAxis
                 dataKey="hourTimestamp"
                 type="number"
                 domain={['dataMin', 'dataMax']}
                 scale="linear"
-                ticks={chartData
+                ticks={chartDataWithAvg
                   .filter((d) => d.hour === 0 || d.hour === 12)
                   .map((d) => d.hourTimestamp)}
                 tick={(props) => {
@@ -262,11 +322,18 @@ export function WeeklyFeedChart({
                   const hourTime = DateTime.fromSeconds(data.hourTimestamp);
                   const displayTime = hourTime.toFormat('EEE @ h:mm a');
 
+                  const avgValue = data.avgMl
+                    ? unit === 'oz'
+                      ? `${mlToOz(data.avgMl)}oz (${Math.round(data.avgMl)}ml)`
+                      : `${Math.round(data.avgMl)}ml (${mlToOz(data.avgMl)}oz)`
+                    : null;
+
                   if (!data.ml || data.ml === 0) {
                     return (
                       <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-lg">
-                        <p className="text-sm font-medium text-gray-900">{displayTime}</p>
+                        <p className="text-sm font-medium text-gray-900 mb-2">{displayTime}</p>
                         <p className="text-sm text-gray-500">No feeds this hour</p>
+                        {avgValue && <p className="text-sm text-amber-600">12hr avg: {avgValue}</p>}
                       </div>
                     );
                   }
@@ -278,8 +345,9 @@ export function WeeklyFeedChart({
 
                   return (
                     <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-lg">
-                      <p className="text-sm font-medium text-gray-900">{displayTime}</p>
+                      <p className="text-sm font-medium text-gray-900 mb-2">{displayTime}</p>
                       <p className="text-sm font-semibold text-blue-600">{displayValue}</p>
+                      {avgValue && <p className="text-sm text-amber-600">12hr avg: {avgValue}</p>}
                     </div>
                   );
                 }}
@@ -295,7 +363,15 @@ export function WeeklyFeedChart({
                 />
               ))}
               <Bar dataKey="ml" fill="#3b82f6" radius={[2, 2, 0, 0]} barSize={6} />
-            </BarChart>
+              <Line
+                dataKey="avgMl"
+                stroke="#f59e0b"
+                strokeWidth={2}
+                dot={false}
+                connectNulls={false}
+                type="monotone"
+              />
+            </ComposedChart>
           </ResponsiveContainer>
         </div>
       )}
