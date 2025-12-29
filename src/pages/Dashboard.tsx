@@ -206,6 +206,7 @@ export function Dashboard() {
     if (changeType === 'pee') return '💧';
     if (changeType === 'poo') return '💩';
     if (changeType === 'mixed') return '💧💩';
+    if (changeType === 'dry') return '🌵';
     return '?';
   };
 
