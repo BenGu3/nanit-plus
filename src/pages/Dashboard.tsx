@@ -57,11 +57,12 @@ export function Dashboard() {
   const babyUid = babiesData?.babies[0]?.uid;
 
   // Calculate time range for recent data - recalculate on refresh
+  // Fetch last 7 days to find last poop, but only show 12/24hr for cards
   // biome-ignore lint/correctness/useExhaustiveDependencies: refreshKey intentionally triggers recalculation
   const { recentStartTime, recentEndTime } = useMemo(() => {
     const currentTime = DateTime.now();
     return {
-      recentStartTime: currentTime.minus({ hours: 24 }).toUnixInteger(),
+      recentStartTime: currentTime.minus({ days: 7 }).toUnixInteger(),
       recentEndTime: currentTime.toUnixInteger(),
     };
   }, [refreshKey]); // Recalculate when refreshKey changes
@@ -138,12 +139,22 @@ export function Dashboard() {
   const chartEvents = chartCalendarData?.calendar || [];
 
   const lastPoop = useMemo(() => {
-    return recentEvents
+    const poop = recentEvents
       .filter(
         (e) => e.type === 'diaper_change' && (e.change_type === 'poo' || e.change_type === 'mixed'),
       )
       .sort((a, b) => b.time - a.time)[0];
-  }, [recentEvents]);
+
+    // Only return if it's within the last 7 days, otherwise return undefined for N/A
+    if (poop) {
+      const poopTime = DateTime.fromSeconds(poop.time);
+      const weekAgo = now.minus({ days: 7 });
+      if (poopTime >= weekAgo) {
+        return poop;
+      }
+    }
+    return undefined;
+  }, [recentEvents, now]);
 
   const lastFeed = useMemo(() => {
     return recentEvents.filter((e) => e.type === 'bottle_feed').sort((a, b) => b.time - a.time)[0];
