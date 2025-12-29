@@ -4,6 +4,7 @@ import * as caresService from '../api/_services/cares';
 import index from './index.html';
 
 const server = serve({
+  port: 4500,
   routes: {
     // Serve index.html for all unmatched routes.
     '/*': index,
