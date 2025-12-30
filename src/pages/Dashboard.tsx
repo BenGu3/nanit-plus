@@ -236,17 +236,17 @@ export function Dashboard() {
   // Week data can load in the background
   if (isLoadingRecent && !recentCalendarData) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading dashboard...</p>
+          <p className="text-gray-600 dark:text-gray-400">Loading dashboard...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <main className="container mx-auto p-3 md:p-8">
         <div className="flex justify-end items-center mb-4">
           <div className="flex gap-2">
@@ -256,7 +256,7 @@ export function Dashboard() {
               className={`px-3 py-1.5 text-sm font-medium rounded transition ${
                 timeRange === 12
                   ? 'bg-blue-600 text-white'
-                  : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                  : 'bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
               }`}
             >
               12h
@@ -267,7 +267,7 @@ export function Dashboard() {
               className={`px-3 py-1.5 text-sm font-medium rounded transition ${
                 timeRange === 24
                   ? 'bg-blue-600 text-white'
-                  : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                  : 'bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
               }`}
             >
               24h
@@ -278,54 +278,56 @@ export function Dashboard() {
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Feeds Card */}
-            <div className="bg-white border border-gray-200 rounded-lg p-4 md:p-6 shadow-sm">
+            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 md:p-6 shadow-sm">
               <div className="mb-3 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                 <div className="flex-shrink-0">
-                  <h3 className="text-xl md:text-2xl font-bold text-gray-900">
+                  <h3 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
                     🍼 Feeds ({feeds.length})
                   </h3>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
                     {totalFeedMl}ml ({totalFeedOz}oz)
                   </p>
                 </div>
                 <div className="flex gap-2 flex-wrap">
-                  <div className="text-center border border-gray-200 rounded-md py-1.5 px-2.5 bg-gray-50 flex-1 sm:flex-initial min-w-24">
-                    <p className="text-xs text-gray-400 mb-0.5">Avg Interval</p>
-                    <p className="text-sm font-medium text-gray-700">
+                  <div className="text-center border border-gray-200 dark:border-gray-600 rounded-md py-1.5 px-2.5 bg-gray-50 dark:bg-gray-700 flex-1 sm:flex-initial min-w-24">
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mb-0.5">Avg Interval</p>
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
                       {feeds.length > 1 ? calculateAverageInterval(feeds) : 'N/A'}
                     </p>
                   </div>
-                  <div className="text-center border border-gray-200 rounded-md py-1.5 px-2.5 bg-gray-50 flex-1 sm:flex-initial min-w-24">
-                    <p className="text-xs text-gray-400 mb-0.5">Last Feed</p>
-                    <p className="text-sm font-medium text-gray-700">
+                  <div className="text-center border border-gray-200 dark:border-gray-600 rounded-md py-1.5 px-2.5 bg-gray-50 dark:bg-gray-700 flex-1 sm:flex-initial min-w-24">
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mb-0.5">Last Feed</p>
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
                       {lastFeed ? formatTimeSince(lastFeed.time) : 'N/A'}
                     </p>
                   </div>
                 </div>
               </div>
-              <div className="border-t border-gray-200"></div>
+              <div className="border-t border-gray-200 dark:border-gray-700"></div>
               <div className="space-y-1 pt-2">
                 {feeds.length === 0 ? (
-                  <p className="text-gray-500 text-sm text-center">No feeds in this period</p>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm text-center">
+                    No feeds in this period
+                  </p>
                 ) : (
                   feeds.map((feed, index) => (
                     <div key={feed.id}>
                       <div className="flex items-center text-xs sm:text-sm gap-2 min-h-8">
-                        <span className="text-gray-700 w-20 sm:w-32 flex-shrink-0">
+                        <span className="text-gray-700 dark:text-gray-300 w-20 sm:w-32 flex-shrink-0">
                           {feed.feed_amount}ml ({mlToOz(feed.feed_amount || 0)}oz)
                         </span>
-                        <span className="text-gray-500 flex-1 min-w-0 truncate sm:truncate-none">
+                        <span className="text-gray-500 dark:text-gray-400 flex-1 min-w-0 truncate sm:truncate-none">
                           {formatExactTime(feed.time)}
                         </span>
-                        <span className="text-gray-500 text-right w-24 sm:w-32 flex-shrink-0">
+                        <span className="text-gray-500 dark:text-gray-400 text-right w-24 sm:w-32 flex-shrink-0">
                           {formatTimeSince(feed.time)}
                         </span>
                       </div>
                       {index < feeds.length - 1 && (
                         <div className="relative my-2">
-                          <div className="border-b border-gray-200"></div>
-                          <div className="absolute right-0 top-1/2 -translate-y-1/2 bg-white px-2">
-                            <span className="text-xs text-gray-400">
+                          <div className="border-b border-gray-200 dark:border-gray-700"></div>
+                          <div className="absolute right-0 top-1/2 -translate-y-1/2 bg-white dark:bg-gray-800 px-2">
+                            <span className="text-xs text-gray-400 dark:text-gray-500">
                               {formatTimeDiff(feed.time - feeds[index + 1].time)}
                             </span>
                           </div>
@@ -338,56 +340,56 @@ export function Dashboard() {
             </div>
 
             {/* Diapers Card */}
-            <div className="bg-white border border-gray-200 rounded-lg p-4 md:p-6 shadow-sm">
+            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 md:p-6 shadow-sm">
               <div className="mb-3 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                 <div className="flex-shrink-0">
-                  <h3 className="text-xl md:text-2xl font-bold text-gray-900">
+                  <h3 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
                     🐣 Diapers ({diapers.length})
                   </h3>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
                     last poop: {lastPoop ? formatTimeSince(lastPoop.time) : 'N/A'}
                   </p>
                 </div>
                 <div className="flex gap-2 flex-wrap">
-                  <div className="text-center border border-gray-200 rounded-md py-1.5 px-2.5 bg-gray-50 flex-1 sm:flex-initial min-w-24">
-                    <p className="text-xs text-gray-400 mb-0.5">Avg Interval</p>
-                    <p className="text-sm font-medium text-gray-700">
+                  <div className="text-center border border-gray-200 dark:border-gray-600 rounded-md py-1.5 px-2.5 bg-gray-50 dark:bg-gray-700 flex-1 sm:flex-initial min-w-24">
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mb-0.5">Avg Interval</p>
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
                       {diapers.length > 1 ? calculateAverageInterval(diapers) : 'N/A'}
                     </p>
                   </div>
-                  <div className="text-center border border-gray-200 rounded-md py-1.5 px-2.5 bg-gray-50 flex-1 sm:flex-initial min-w-24">
-                    <p className="text-xs text-gray-400 mb-0.5">Last Change</p>
-                    <p className="text-sm font-medium text-gray-700">
+                  <div className="text-center border border-gray-200 dark:border-gray-600 rounded-md py-1.5 px-2.5 bg-gray-50 dark:bg-gray-700 flex-1 sm:flex-initial min-w-24">
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mb-0.5">Last Change</p>
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
                       {diapers.length > 0 ? formatTimeSince(diapers[0].time) : 'N/A'}
                     </p>
                   </div>
                 </div>
               </div>
-              <div className="border-t border-gray-200"></div>
+              <div className="border-t border-gray-200 dark:border-gray-700"></div>
               <div className="space-y-1 pt-2">
                 {diapers.length === 0 ? (
-                  <p className="text-gray-500 text-sm text-center">
+                  <p className="text-gray-500 dark:text-gray-400 text-sm text-center">
                     No diaper changes in this period
                   </p>
                 ) : (
                   diapers.map((event, index) => (
                     <div key={event.id}>
                       <div className="flex items-center text-xs sm:text-sm gap-2 min-h-8">
-                        <span className="text-gray-700 w-20 sm:w-32 text-sm flex-shrink-0">
+                        <span className="text-gray-700 dark:text-gray-300 w-20 sm:w-32 text-sm flex-shrink-0">
                           {getDiaperEmoji(event.change_type)}
                         </span>
-                        <span className="text-gray-500 flex-1 min-w-0 truncate sm:truncate-none">
+                        <span className="text-gray-500 dark:text-gray-400 flex-1 min-w-0 truncate sm:truncate-none">
                           {formatExactTime(event.time)}
                         </span>
-                        <span className="text-gray-500 text-right w-24 sm:w-32 flex-shrink-0">
+                        <span className="text-gray-500 dark:text-gray-400 text-right w-24 sm:w-32 flex-shrink-0">
                           {formatTimeSince(event.time)}
                         </span>
                       </div>
                       {index < diapers.length - 1 && (
                         <div className="relative my-2">
-                          <div className="border-b border-gray-200"></div>
-                          <div className="absolute right-0 top-1/2 -translate-y-1/2 bg-white px-2">
-                            <span className="text-xs text-gray-400">
+                          <div className="border-b border-gray-200 dark:border-gray-700"></div>
+                          <div className="absolute right-0 top-1/2 -translate-y-1/2 bg-white dark:bg-gray-800 px-2">
+                            <span className="text-xs text-gray-400 dark:text-gray-500">
                               {formatTimeDiff(event.time - diapers[index + 1].time)}
                             </span>
                           </div>

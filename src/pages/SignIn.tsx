@@ -70,15 +70,18 @@ export function SignIn() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div className="bg-white border border-gray-200 rounded-lg p-8 shadow-sm">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Nanit+</h1>
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-8 shadow-sm">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Nanit+</h1>
 
           {step === 'email' ? (
             <form onSubmit={handleEmailSubmit} className="space-y-4">
               <div>
-                <label htmlFor="email" className="block text-sm font-medium mb-2">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                >
                   Email
                 </label>
                 <input
@@ -87,13 +90,16 @@ export function SignIn() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-gray-400"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-gray-400 dark:placeholder:text-gray-500"
                   placeholder="you@example.com"
                 />
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-medium mb-2">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                >
                   Password
                 </label>
                 <input
@@ -102,13 +108,13 @@ export function SignIn() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-gray-400"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-gray-400 dark:placeholder:text-gray-500"
                   placeholder="••••••••"
                 />
               </div>
 
               {error && (
-                <div className="bg-red-50 text-red-600 px-4 py-3 rounded-md text-sm border border-red-200">
+                <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 px-4 py-3 rounded-md text-sm border border-red-200 dark:border-red-800">
                   {error}
                 </div>
               )}
@@ -116,15 +122,15 @@ export function SignIn() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-blue-600 text-white py-2 rounded-md font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                className="w-full bg-blue-600 dark:bg-blue-700 text-white py-2 rounded-md font-medium hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition"
               >
                 {loading ? 'Signing in...' : 'Sign In'}
               </button>
             </form>
           ) : (
             <form onSubmit={handleMfaSubmit} className="space-y-4">
-              <div className="bg-blue-50 border border-blue-200 p-4 rounded-md mb-4">
-                <p className="text-sm text-gray-700">
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 p-4 rounded-md mb-4">
+                <p className="text-sm text-gray-700 dark:text-gray-300">
                   MFA code sent via <span className="font-semibold">{channel}</span>
                   {phoneSuffix && (
                     <>
@@ -136,7 +142,10 @@ export function SignIn() {
               </div>
 
               <div>
-                <label htmlFor="mfaCode" className="block text-sm font-medium mb-2">
+                <label
+                  htmlFor="mfaCode"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                >
                   Verification Code
                 </label>
                 <input
@@ -145,13 +154,13 @@ export function SignIn() {
                   value={mfaCode}
                   onChange={(e) => setMfaCode(e.target.value)}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-gray-400"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-gray-400 dark:placeholder:text-gray-500"
                   placeholder="Enter code"
                 />
               </div>
 
               {error && (
-                <div className="bg-red-50 text-red-600 border border-red-200 px-4 py-3 rounded-md text-sm">
+                <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 px-4 py-3 rounded-md text-sm">
                   {error}
                 </div>
               )}
@@ -164,14 +173,14 @@ export function SignIn() {
                     setMfaCode('');
                     setError(null);
                   }}
-                  className="flex-1 border py-2 rounded-md font-medium border-gray-300 hover:bg-gray-50 transition"
+                  className="flex-1 border py-2 rounded-md font-medium border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
                 >
                   Back
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 bg-blue-600 text-white py-2 rounded-md font-medium hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 bg-blue-600 dark:bg-blue-700 text-white py-2 rounded-md font-medium hover:bg-blue-700 dark:hover:bg-blue-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? 'Verifying...' : 'Verify'}
                 </button>

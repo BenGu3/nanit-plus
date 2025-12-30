@@ -77,17 +77,19 @@ export function FeedChart({
   const isNextDisabled = view === 'daily' ? isToday : isCurrentOrFutureWeek;
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-3 md:p-4 shadow-sm">
+    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3 md:p-4 shadow-sm">
       {/* Header with all controls */}
       <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-900">🍼 Feed Chart</h3>
+        <h3 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-900 dark:text-white">
+          🍼 Feed Chart
+        </h3>
 
         {isMobile ? (
           <div className="relative">
             <button
               type="button"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="p-2 hover:bg-gray-100 rounded transition"
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition"
               aria-label="Chart settings"
             >
               <svg
@@ -109,10 +111,10 @@ export function FeedChart({
             </button>
 
             {isMenuOpen && (
-              <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+              <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-10">
                 <div className="p-2">
                   <div className="mb-2">
-                    <p className="text-xs text-gray-500 mb-1 px-2">View</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-1 px-2">View</p>
                     <div className="flex gap-1">
                       <button
                         type="button"
@@ -120,7 +122,7 @@ export function FeedChart({
                         className={`flex-1 px-2 py-1 text-xs font-medium rounded transition ${
                           view === 'daily'
                             ? 'bg-blue-600 text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                         }`}
                       >
                         Daily
@@ -131,7 +133,7 @@ export function FeedChart({
                         className={`flex-1 px-2 py-1 text-xs font-medium rounded transition ${
                           view === 'weekly'
                             ? 'bg-blue-600 text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                         }`}
                       >
                         Weekly
@@ -139,7 +141,7 @@ export function FeedChart({
                     </div>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500 mb-1 px-2">Unit</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-1 px-2">Unit</p>
                     <div className="flex gap-1">
                       <button
                         type="button"
@@ -147,7 +149,7 @@ export function FeedChart({
                         className={`flex-1 px-2 py-1 text-xs font-medium rounded transition ${
                           unit === 'ml'
                             ? 'bg-blue-600 text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                         }`}
                       >
                         ml
@@ -158,7 +160,7 @@ export function FeedChart({
                         className={`flex-1 px-2 py-1 text-xs font-medium rounded transition ${
                           unit === 'oz'
                             ? 'bg-blue-600 text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                         }`}
                       >
                         oz
@@ -179,7 +181,7 @@ export function FeedChart({
                 className={`px-2 py-1 text-xs font-medium rounded transition ${
                   view === 'daily'
                     ? 'bg-blue-600 text-white'
-                    : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                    : 'bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
                 }`}
               >
                 Daily
@@ -190,7 +192,7 @@ export function FeedChart({
                 className={`px-2 py-1 text-xs font-medium rounded transition ${
                   view === 'weekly'
                     ? 'bg-blue-600 text-white'
-                    : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                    : 'bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
                 }`}
               >
                 Weekly
@@ -204,7 +206,7 @@ export function FeedChart({
                 className={`px-2 py-1 text-xs font-medium rounded transition ${
                   unit === 'ml'
                     ? 'bg-blue-600 text-white'
-                    : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                    : 'bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
                 }`}
               >
                 ml
@@ -215,7 +217,7 @@ export function FeedChart({
                 className={`px-2 py-1 text-xs font-medium rounded transition ${
                   unit === 'oz'
                     ? 'bg-blue-600 text-white'
-                    : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                    : 'bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
                 }`}
               >
                 oz
@@ -231,11 +233,11 @@ export function FeedChart({
           <button
             type="button"
             onClick={handlePrev}
-            className="p-1.5 hover:bg-gray-100 rounded transition"
+            className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition"
             aria-label={view === 'daily' ? 'Previous day' : 'Previous week'}
           >
             <svg
-              className="w-5 h-5 text-gray-700"
+              className="w-5 h-5 text-gray-700 dark:text-gray-300"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -251,7 +253,7 @@ export function FeedChart({
               />
             </svg>
           </button>
-          <span className="text-xs sm:text-sm font-medium text-gray-700 min-w-[120px] sm:min-w-[140px] text-center">
+          <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px] sm:min-w-[140px] text-center">
             {formatDateRange()}
           </span>
           <button
@@ -260,8 +262,8 @@ export function FeedChart({
             disabled={isNextDisabled}
             className={`p-1.5 rounded transition ${
               isNextDisabled
-                ? 'text-gray-300 cursor-not-allowed'
-                : 'text-gray-700 hover:bg-gray-100'
+                ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
+                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
             }`}
             aria-label={view === 'daily' ? 'Next day' : 'Next week'}
           >
@@ -280,7 +282,7 @@ export function FeedChart({
         </div>
       </div>
 
-      <div className="border-t border-gray-200 mb-2"></div>
+      <div className="border-t border-gray-200 dark:border-gray-700 mb-2"></div>
 
       {/* Render appropriate chart */}
       <div className="pt-2">

@@ -146,11 +146,11 @@ export function DailyFeedChart({
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-            <p className="text-sm text-gray-500">Loading chart...</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Loading chart...</p>
           </div>
         </div>
       ) : !hasData ? (
-        <div className="flex items-center justify-center h-64 text-gray-500">
+        <div className="flex items-center justify-center h-64 text-gray-500 dark:text-gray-400">
           <p className="text-sm">No feeds this day</p>
         </div>
       ) : (
@@ -221,12 +221,22 @@ export function DailyFeedChart({
 
                   if (!data.ml || data.ml === 0) {
                     return (
-                      <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-lg">
-                        <p className="text-sm font-medium text-gray-900 mb-2">{displayTime}</p>
-                        <p className="text-sm text-gray-500">No feeds this hour</p>
-                        {avgValue && <p className="text-sm text-amber-600">12hr avg: {avgValue}</p>}
+                      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3 shadow-lg">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+                          {displayTime}
+                        </p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          No feeds this hour
+                        </p>
+                        {avgValue && (
+                          <p className="text-sm text-amber-600 dark:text-amber-500">
+                            12hr avg: {avgValue}
+                          </p>
+                        )}
                         {totalValue && (
-                          <p className="text-sm text-amber-600">12hr total: {totalValue}</p>
+                          <p className="text-sm text-amber-600 dark:text-amber-500">
+                            12hr total: {totalValue}
+                          </p>
                         )}
                       </div>
                     );
@@ -238,12 +248,22 @@ export function DailyFeedChart({
                       : `${Math.round(data.ml)}ml (${mlToOz(data.ml)}oz)`;
 
                   return (
-                    <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-lg">
-                      <p className="text-sm font-medium text-gray-900 mb-2">{displayTime}</p>
-                      <p className="text-sm font-semibold text-blue-600">{displayValue}</p>
-                      {avgValue && <p className="text-sm text-amber-600">12hr avg: {avgValue}</p>}
+                    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3 shadow-lg">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+                        {displayTime}
+                      </p>
+                      <p className="text-sm font-semibold text-blue-600 dark:text-blue-400">
+                        {displayValue}
+                      </p>
+                      {avgValue && (
+                        <p className="text-sm text-amber-600 dark:text-amber-500">
+                          12hr avg: {avgValue}
+                        </p>
+                      )}
                       {totalValue && (
-                        <p className="text-sm text-amber-600">12hr total: {totalValue}</p>
+                        <p className="text-sm text-amber-600 dark:text-amber-500">
+                          12hr total: {totalValue}
+                        </p>
                       )}
                     </div>
                   );
