@@ -1,12 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { DateTime } from 'luxon';
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { nanitAPI } from '@/api';
 import { FeedChart } from '@/components/FeedChart';
 
 export function Dashboard() {
-  const navigate = useNavigate();
   const [timeRange, setTimeRange] = useState<12 | 24>(12);
 
   // Add a refresh key that updates to trigger "now" recalculation
@@ -110,11 +108,6 @@ export function Dashboard() {
     gcTime: 1000 * 60 * 30, // Keep in cache for 30 minutes
     refetchOnWindowFocus: true,
   });
-
-  const handleSignOut = () => {
-    nanitAPI.clearToken();
-    navigate('/sign-in');
-  };
 
   const handlePrevWeek = () => {
     setWeekStart((prev) => prev.minus({ weeks: 1 }));
@@ -254,19 +247,6 @@ export function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="border-b border-gray-200 bg-white">
-        <div className="px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-900">Nanit+</h1>
-          <button
-            type="button"
-            onClick={handleSignOut}
-            className="text-gray-600 hover:text-gray-900 transition"
-          >
-            Sign Out
-          </button>
-        </div>
-      </header>
-
       <main className="container mx-auto p-3 md:p-8">
         <div className="flex justify-end items-center mb-4">
           <div className="flex gap-2">

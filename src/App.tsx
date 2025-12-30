@@ -1,7 +1,9 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { nanitAPI } from '@/api';
+import { Navigation } from '@/components/Navigation';
 import { Dashboard } from '@/pages/Dashboard';
+import { FormulaCalculator } from '@/pages/FormulaCalculator';
 import { SignIn } from '@/pages/SignIn';
 
 const queryClient = new QueryClient();
@@ -11,7 +13,12 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   if (!token) {
     return <Navigate to="/sign-in" replace />;
   }
-  return <>{children}</>;
+  return (
+    <>
+      <Navigation />
+      {children}
+    </>
+  );
 }
 
 export function App() {
@@ -21,15 +28,22 @@ export function App() {
         <Routes>
           <Route path="/sign-in" element={<SignIn />} />
           <Route
-            path="/dashboard"
+            path="/"
             element={
               <ProtectedRoute>
                 <Dashboard />
               </ProtectedRoute>
             }
           />
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          <Route
+            path="/formula-calculator"
+            element={
+              <ProtectedRoute>
+                <FormulaCalculator />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>
