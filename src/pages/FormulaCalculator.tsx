@@ -1,11 +1,30 @@
 import { useEffect, useState } from 'react';
 
 export function FormulaCalculator() {
-  const [bottles, setBottles] = useState('8');
-  const [amountPerBottle, setAmountPerBottle] = useState('');
-  const [unit, setUnit] = useState<'ml' | 'oz'>('ml');
+  const [bottles, setBottles] = useState(() => {
+    return localStorage.getItem('formula_bottles') || '8';
+  });
+  const [amountPerBottle, setAmountPerBottle] = useState(() => {
+    return localStorage.getItem('formula_amount') || '';
+  });
+  const [unit, setUnit] = useState<'ml' | 'oz'>(() => {
+    return (localStorage.getItem('formula_unit') as 'ml' | 'oz') || 'ml';
+  });
   const [debouncedBottles, setDebouncedBottles] = useState('8');
   const [debouncedAmount, setDebouncedAmount] = useState('');
+
+  // Save to localStorage whenever inputs change
+  useEffect(() => {
+    localStorage.setItem('formula_bottles', bottles);
+  }, [bottles]);
+
+  useEffect(() => {
+    localStorage.setItem('formula_amount', amountPerBottle);
+  }, [amountPerBottle]);
+
+  useEffect(() => {
+    localStorage.setItem('formula_unit', unit);
+  }, [unit]);
 
   // Handle unit change and convert the value
   const handleUnitChange = (newUnit: 'ml' | 'oz') => {
