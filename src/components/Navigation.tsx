@@ -23,20 +23,20 @@ export function Navigation() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-gray-200 bg-white">
-      <div className="px-4 py-4 flex justify-between items-center relative">
-        <h1 className="text-2xl font-bold text-gray-900">Nanit+</h1>
+      <div className="px-3 py-2 md:px-4 md:py-4 flex justify-between items-center relative">
+        <h1 className="text-xl md:text-2xl font-bold text-gray-900">Nanit+</h1>
 
         {isMobile ? (
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <Link
               to="/"
-              className={`p-2 rounded transition ${
+              className={`p-1.5 rounded transition ${
                 isActive('/') ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:bg-gray-100'
               }`}
               aria-label="Home"
             >
               <svg
-                className="w-6 h-6"
+                className="w-5 h-5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -54,13 +54,13 @@ export function Navigation() {
             </Link>
             <Link
               to="/tools"
-              className={`p-2 rounded transition ${
+              className={`p-1.5 rounded transition ${
                 isActive('/tools') ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:bg-gray-100'
               }`}
               aria-label="Tools"
             >
               <svg
-                className="w-6 h-6"
+                className="w-5 h-5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -79,11 +79,11 @@ export function Navigation() {
             <button
               type="button"
               onClick={handleSignOut}
-              className="p-2 text-gray-600 hover:bg-gray-100 rounded transition"
+              className="p-1.5 text-gray-600 hover:bg-gray-100 rounded transition"
               aria-label="Sign Out"
             >
               <svg
-                className="w-6 h-6"
+                className="w-5 h-5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"

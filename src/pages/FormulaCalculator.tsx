@@ -88,8 +88,6 @@ export function FormulaCalculator() {
   return (
     <div className="min-h-screen bg-gray-50">
       <main className="container mx-auto p-3 md:p-8 max-w-2xl">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Formula Calculator</h2>
-
         {/* Preset buttons */}
         <div className="mb-6 flex gap-2">
           <button
