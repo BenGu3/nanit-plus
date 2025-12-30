@@ -255,8 +255,8 @@ export function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="border-b border-gray-200 bg-white">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-900">Nanit Insights</h1>
+        <div className="px-4 py-4 flex justify-between items-center">
+          <h1 className="text-2xl font-bold text-gray-900">Nanit+</h1>
           <button
             type="button"
             onClick={handleSignOut}
