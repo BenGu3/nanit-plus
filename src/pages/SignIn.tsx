@@ -64,7 +64,7 @@ export function SignIn() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="bg-white border border-gray-200 rounded-lg p-8 shadow-sm">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Nanit Insights</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Nanit+</h1>
 
           {step === 'email' ? (
             <form onSubmit={handleEmailSubmit} className="space-y-4">
@@ -78,7 +78,7 @@ export function SignIn() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-gray-400"
                   placeholder="you@example.com"
                 />
               </div>
@@ -93,7 +93,7 @@ export function SignIn() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-gray-400"
                   placeholder="••••••••"
                 />
               </div>
@@ -136,7 +136,7 @@ export function SignIn() {
                   value={mfaCode}
                   onChange={(e) => setMfaCode(e.target.value)}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-gray-400"
                   placeholder="Enter code"
                 />
               </div>
