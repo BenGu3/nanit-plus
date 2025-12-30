@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { nanitAPI } from '@/api';
 
@@ -7,6 +7,15 @@ export function SignIn() {
   const [step, setStep] = useState<'email' | 'mfa'>('email');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Check if user already has a token on mount
+  useEffect(() => {
+    const token = nanitAPI.getToken();
+    if (token) {
+      // User already has a token, redirect to home
+      navigate('/', { replace: true });
+    }
+  }, [navigate]);
 
   // Email/password step
   const [email, setEmail] = useState('');
@@ -34,7 +43,7 @@ export function SignIn() {
         setStep('mfa');
       } else if (response.access_token || response.token) {
         // Direct login (unlikely but handle it)
-        navigate('/dashboard');
+        navigate('/');
       } else {
         setError('Unexpected response from server');
       }
@@ -52,7 +61,7 @@ export function SignIn() {
 
     try {
       await nanitAPI.verifyMFA(email, password, mfaToken, mfaCode, channel);
-      navigate('/dashboard');
+      navigate('/');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'MFA verification failed');
     } finally {
