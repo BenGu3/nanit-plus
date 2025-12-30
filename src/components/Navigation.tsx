@@ -22,7 +22,7 @@ export function Navigation() {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <header className="border-b border-gray-200 bg-white">
+    <header className="sticky top-0 z-50 border-b border-gray-200 bg-white">
       <div className="px-4 py-4 flex justify-between items-center relative">
         <h1 className="text-2xl font-bold text-gray-900">Nanit+</h1>
 
