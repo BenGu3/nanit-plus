@@ -36,7 +36,7 @@ export function App() {
             }
           />
           <Route
-            path="/formula-calculator"
+            path="/tools"
             element={
               <ProtectedRoute>
                 <FormulaCalculator />

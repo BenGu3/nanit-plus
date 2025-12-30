@@ -53,11 +53,9 @@ export function Navigation() {
               </svg>
             </Link>
             <Link
-              to="/formula-calculator"
+              to="/tools"
               className={`p-2 rounded transition ${
-                isActive('/formula-calculator')
-                  ? 'text-blue-600 bg-blue-50'
-                  : 'text-gray-700 hover:bg-gray-100'
+                isActive('/tools') ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:bg-gray-100'
               }`}
               aria-label="Tools"
             >
@@ -132,9 +130,9 @@ export function Navigation() {
                 Home
               </Link>
               <Link
-                to="/formula-calculator"
+                to="/tools"
                 className={`flex items-center gap-2 transition cursor-pointer ${
-                  isActive('/formula-calculator')
+                  isActive('/tools')
                     ? 'text-blue-600 font-bold'
                     : 'text-gray-700 hover:text-gray-900 font-medium'
                 }`}
