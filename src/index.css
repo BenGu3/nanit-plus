@@ -1,2 +1,12 @@
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
+
+html,
+body {
+  @apply bg-white dark:bg-gray-950;
+  min-height: 100%;
+}
+
+body {
+  overscroll-behavior: none;
+}
