@@ -192,7 +192,7 @@ export function FormulaCalculator() {
               <select
                 value={unit}
                 onChange={(e) => handleUnitChange(e.target.value as 'ml' | 'oz')}
-                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                className="px-2 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
                 <option value="ml">ml</option>
                 <option value="oz">oz</option>
