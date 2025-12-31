@@ -122,22 +122,47 @@ export function FormulaCalculator() {
             >
               Number of bottles
             </label>
-            <input
-              id="num-bottles"
-              type="number"
-              value={bottles}
-              onChange={(e) => {
-                const value = e.target.value;
-                // Only allow integers (no decimals)
-                if (value === '' || /^\d+$/.test(value)) {
-                  setBottles(value);
-                }
-              }}
-              placeholder="e.g. 8"
-              step="1"
-              min="1"
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:text-gray-400 dark:placeholder:text-gray-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            />
+            <div className="flex gap-2 w-full overflow-hidden">
+              <input
+                id="num-bottles"
+                type="number"
+                value={bottles}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  // Only allow integers (no decimals)
+                  if (value === '' || /^\d+$/.test(value)) {
+                    setBottles(value);
+                  }
+                }}
+                placeholder="e.g. 8"
+                step="1"
+                min="1"
+                className="flex-1 min-w-0 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:text-gray-400 dark:placeholder:text-gray-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  const currentValue = Number.parseInt(bottles || '0', 10);
+                  if (currentValue > 1) {
+                    setBottles((currentValue - 1).toString());
+                  }
+                }}
+                disabled={!bottles || Number.parseInt(bottles, 10) <= 1}
+                className="p-2 w-10 h-10 flex-shrink-0 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center justify-center"
+              >
+                −
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const currentValue = Number.parseInt(bottles || '0', 10);
+                  setBottles((currentValue + 1).toString());
+                }}
+                className="p-2 w-10 h-10 flex-shrink-0 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-600 transition flex items-center justify-center"
+              >
+                +
+              </button>
+            </div>
           </div>
 
           <div>
