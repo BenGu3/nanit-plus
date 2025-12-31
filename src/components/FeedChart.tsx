@@ -80,8 +80,13 @@ export function FeedChart({
     <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3 md:p-4 shadow-sm">
       {/* Header with all controls */}
       <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-900 dark:text-white">
-          🍼 Feed Chart
+        <h3 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+          {isLoading ? (
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+          ) : (
+            <span>🍼</span>
+          )}
+          Feed Chart
         </h3>
 
         {isMobile ? (

@@ -19,12 +19,7 @@ interface WeeklyFeedChartProps {
   isLoading?: boolean;
 }
 
-export function WeeklyFeedChart({
-  allEvents,
-  weekStart,
-  unit,
-  isLoading = false,
-}: WeeklyFeedChartProps) {
+export function WeeklyFeedChart({ allEvents, weekStart, unit }: WeeklyFeedChartProps) {
   const weekEnd = weekStart.plus({ days: 7 }).minus({ seconds: 1 });
 
   // Detect mobile
@@ -151,14 +146,7 @@ export function WeeklyFeedChart({
   return (
     <>
       {/* Chart or empty state */}
-      {isLoading ? (
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Loading chart...</p>
-          </div>
-        </div>
-      ) : !hasData ? (
+      {!hasData ? (
         <div className="flex items-center justify-center h-64 text-gray-500 dark:text-gray-400">
           <p className="text-sm">No feeds this week</p>
         </div>

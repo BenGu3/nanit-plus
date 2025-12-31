@@ -56,19 +56,18 @@ export function Dashboard() {
 
   // Calculate time range for recent data - recalculate on refresh
   // Fetch last 7 days to find last poop, but only show 12/24hr for cards
-  // biome-ignore lint/correctness/useExhaustiveDependencies: refreshKey intentionally triggers recalculation
-  const { recentStartTime, recentEndTime } = useMemo(() => {
-    const currentTime = DateTime.now();
-    return {
-      recentStartTime: currentTime.minus({ days: 7 }).toUnixInteger(),
-      recentEndTime: currentTime.toUnixInteger(),
-    };
-  }, [refreshKey]); // Recalculate when refreshKey changes
-
-  const { data: recentCalendarData, isLoading: isLoadingRecent } = useQuery({
-    queryKey: ['calendar', 'recent', babyUid, recentStartTime, recentEndTime],
+  // Use a stable query key so cached data is preserved when refetching
+  const {
+    data: recentCalendarData,
+    isLoading: isLoadingRecent,
+    isFetching: isFetchingRecent,
+  } = useQuery({
+    queryKey: ['calendar', 'recent', babyUid],
     queryFn: () => {
       if (!babyUid) throw new Error('No baby UID');
+      const currentTime = DateTime.now();
+      const recentStartTime = currentTime.minus({ days: 7 }).toUnixInteger();
+      const recentEndTime = currentTime.toUnixInteger();
       return nanitAPI.getCalendar(babyUid, recentStartTime, recentEndTime);
     },
     enabled: !!babyUid,
@@ -232,9 +231,11 @@ export function Dashboard() {
     return formatTimeDiff(avgSeconds);
   };
 
-  // Show full page loading only on very first load (when recent data doesn't exist)
-  // Week data can load in the background
-  if (isLoadingRecent && !recentCalendarData) {
+  // Show full page loading only on very first load (when data doesn't exist)
+  // This includes:
+  // 1. When we don't have a babyUid yet (calendar queries can't even start)
+  // 2. When calendar data is loading without cached data
+  if (!babyUid || (isLoadingRecent && !recentCalendarData)) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
@@ -281,8 +282,13 @@ export function Dashboard() {
             <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 md:p-6 shadow-sm">
               <div className="mb-3 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                 <div className="flex-shrink-0">
-                  <h3 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
-                    🍼 Feeds ({feeds.length})
+                  <h3 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    {isFetchingRecent ? (
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                    ) : (
+                      <span>🍼</span>
+                    )}
+                    Feeds ({feeds.length})
                   </h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
                     {totalFeedMl}ml ({totalFeedOz}oz)
@@ -343,8 +349,13 @@ export function Dashboard() {
             <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 md:p-6 shadow-sm">
               <div className="mb-3 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                 <div className="flex-shrink-0">
-                  <h3 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
-                    🐣 Diapers ({diapers.length})
+                  <h3 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    {isFetchingRecent ? (
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                    ) : (
+                      <span>🐣</span>
+                    )}
+                    Diapers ({diapers.length})
                   </h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
                     last poop: {lastPoop ? formatTimeSince(lastPoop.time) : 'N/A'}
