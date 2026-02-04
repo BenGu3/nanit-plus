@@ -11,9 +11,8 @@ export interface LoginResponse {
 export interface Baby {
   uid: string;
   id: string;
-  first_name: string;
-  last_name?: string;
-  birthday?: string;
+  birthdate?: string;
+  due_date?: string;
 }
 
 export interface BabiesResponse {

@@ -52,7 +52,43 @@ export function Dashboard() {
     refetchOnWindowFocus: true,
   });
 
-  const babyUid = babiesData?.babies[0]?.uid;
+  const baby = babiesData?.babies[0];
+  const babyUid = baby?.uid;
+
+  const formatBabyAge = (birthdate: string | undefined): string | null => {
+    if (!birthdate) return null;
+
+    const birthDate = DateTime.fromISO(birthdate);
+    const today = DateTime.now();
+    const diff = today.diff(birthDate, ['years', 'months', 'weeks', 'days']);
+
+    const totalDays = Math.floor(today.diff(birthDate, 'days').days);
+    const totalWeeks = Math.floor(today.diff(birthDate, 'weeks').weeks);
+    const totalMonths = Math.floor(today.diff(birthDate, 'months').months);
+
+    if (totalMonths < 1) {
+      return `${totalDays} day${totalDays !== 1 ? 's' : ''} old`;
+    }
+
+    if (totalMonths < 6) {
+      const remainingDays = totalDays - totalWeeks * 7;
+      if (remainingDays === 0) {
+        return `${totalWeeks} week${totalWeeks !== 1 ? 's' : ''} old`;
+      }
+      return `${totalWeeks} week${totalWeeks !== 1 ? 's' : ''}, ${remainingDays} day${remainingDays !== 1 ? 's' : ''} old`;
+    }
+
+    if (totalMonths < 12) {
+      return `${totalMonths} month${totalMonths !== 1 ? 's' : ''} old`;
+    }
+
+    const years = Math.floor(diff.years || 0);
+    const months = Math.floor(diff.months || 0);
+    if (months === 0) {
+      return `${years} year${years !== 1 ? 's' : ''} old`;
+    }
+    return `${years} year${years !== 1 ? 's' : ''}, ${months} month${months !== 1 ? 's' : ''} old`;
+  };
 
   // Calculate time range for recent data - recalculate on refresh
   // Fetch last 7 days to find last poop, but only show 12/24hr for cards
@@ -249,7 +285,23 @@ export function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <main className="container mx-auto p-3 md:p-8">
-        <div className="flex justify-end items-center mb-4">
+        <div className="flex justify-between items-center mb-4">
+          <div>
+            {baby && (
+              <div>
+                {formatBabyAge(baby.birthdate) && (
+                  <p className="text-base text-gray-600 dark:text-gray-400">
+                    {formatBabyAge(baby.birthdate)}
+                  </p>
+                )}
+                {formatBabyAge(baby.due_date) && (
+                  <p className="text-sm text-gray-500 dark:text-gray-500">
+                    ({formatBabyAge(baby.due_date)})
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
           <div className="flex gap-2">
             <button
               type="button"
